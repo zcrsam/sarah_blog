@@ -1,674 +1,922 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import profile1 from "./assets/3.png";
+import image1 from "./assets/1.png";
+import image2 from "./assets/2.JPG";
+import profile2 from "./assets/profile2.jpeg";
+import week1 from "./assets/week1.png";
+import week2 from "./assets/week2.png";
+import week3 from "./assets/week3.jpg";
 
-// ── SCENES ────────────────────────────────────────────────────────────────────
-const hallwayPanels = [
-  {
-    id: "orientation",
-    roomLabel: "ORIENTATION",
-    detail: "Week 1 · Day 1",
-    description: "First day jitters. A new badge, a new desk, and a hundred things I didn't know yet.",
-    hasArtwork: true,
-    artworkText: "Hello\nWorld",
-  },
-  {
-    id: "about",
-    roomLabel: "ABOUT ME",
-    detail: "Background",
-    description: "CS Student, 4th Year. I walked in as a student. I'd walk out as something more.",
-    skills: ["React", "Node.js", "TypeScript", "CSS3"],
-  },
-  {
-    id: "gallery",
-    roomLabel: "THE GALLERY",
-    detail: "Weeks 2–4",
-    description: "Projects lined the walls. Each one a small victory, a lesson learned, a bug finally squashed.",
-    hasArtwork: true,
-    artworkText: "✦",
-  },
-  {
-    id: "milestone",
-    roomLabel: "MILESTONE",
-    detail: "Week 5",
-    description: "73% done. The codebase started making sense. I stopped copy-pasting Stack Overflow blindly.",
-    percent: 73,
-  },
-  {
-    id: "final",
-    roomLabel: "GRADUATION",
-    detail: "500 Hours",
-    description: "500 hours. Countless bugs. Real friendships. Actual growth. OJT Complete.",
-    isFinal: true,
-  },
-];
+gsap.registerPlugin(ScrollTrigger);
 
-// ── PAPER TEXTURE ─────────────────────────────────────────────────────────────
-const PaperTexture = () => (
-  <svg
-    style={{
-      position: "fixed", inset: 0, width: "100%", height: "100%",
-      pointerEvents: "none", opacity: 0.045, zIndex: 0,
-    }}
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <filter id="noise">
-      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-      <feColorMatrix type="saturate" values="0" />
-    </filter>
-    <rect width="100%" height="100%" filter="url(#noise)" />
-  </svg>
-);
+// ─── CLOCK COMPONENT (mainoage.tsx inline) ───────────────────────────────────
+const WeeklyClock = () => {
+  const canvasRef = useRef(null);
+  const animRef = useRef(null);
 
-// ── ANALOG CLOCK ──────────────────────────────────────────────────────────────
-function AnalogClock({ onClick }) {
-  const [time, setTime] = useState(new Date());
-  const [hovered, setHovered] = useState(false);
+  const weeks = [
+    { label: 'W1', title: 'Research & Flowchart', color: '#4ade80' },
+    { label: 'W2', title: 'Frontend Dev', color: '#60a5fa' },
+    { label: 'W3', title: 'Auth & Backend', color: '#f472b6' },
+    { label: 'W4', title: 'Real-time & UI', color: '#fb923c' },
+    { label: 'W5', title: 'Notif & Optimization', color: '#a78bfa' },
+    { label: 'W6', title: 'Email & Booking', color: '#34d399' },
+    { label: 'W7', title: 'Debugging & UX', color: '#fbbf24' },
+    { label: 'W8', title: 'Room Config & Sync', color: '#f87171' },
+    { label: 'W9', title: 'UI Refinements & Docs', color: '#38bdf8' },
+    { label: 'W10', title: 'Presentation & Turnover', color: '#e879f9' },
+  ];
 
   useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(t);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let tick = 0;
+
+    const draw = () => {
+      const W = canvas.width;
+      const H = canvas.height;
+      const cx = W / 2;
+      const cy = H / 2;
+      const R = Math.min(W, H) * 0.38;
+
+      ctx.clearRect(0, 0, W, H);
+
+      // Background
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, 0, W, H);
+
+      // Outer glow ring
+      const grd = ctx.createRadialGradient(cx, cy, R * 0.8, cx, cy, R * 1.2);
+      grd.addColorStop(0, 'rgba(255,255,255,0.03)');
+      grd.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.beginPath();
+      ctx.arc(cx, cy, R * 1.15, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+
+      const total = weeks.length;
+      const sliceAngle = (Math.PI * 2) / total;
+
+      weeks.forEach((week, i) => {
+        const startAngle = -Math.PI / 2 + i * sliceAngle + 0.015;
+        const endAngle = startAngle + sliceAngle - 0.03;
+        const midAngle = (startAngle + endAngle) / 2;
+
+        // Pulse offset per segment
+        const pulse = Math.sin(tick * 0.04 + i * 0.7) * 0.012;
+
+        // Arc segment
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, R * (0.52 + pulse), startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = week.color + '22';
+        ctx.fill();
+
+        // Outer arc stroke
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * (0.92 + pulse * 0.5), startAngle, endAngle);
+        ctx.strokeStyle = week.color;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Inner arc stroke
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * (0.54 + pulse), startAngle, endAngle);
+        ctx.strokeStyle = week.color + '55';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Week label on arc
+        const labelR = R * 0.73;
+        const lx = cx + Math.cos(midAngle) * labelR;
+        const ly = cy + Math.sin(midAngle) * labelR;
+
+        ctx.save();
+        ctx.translate(lx, ly);
+        ctx.rotate(midAngle + Math.PI / 2);
+        ctx.fillStyle = week.color;
+        ctx.font = `bold ${Math.max(10, R * 0.11)}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(week.label, 0, 0);
+        ctx.restore();
+
+        // Dot at midpoint on outer ring
+        const dotR = R * 0.95;
+        const dx = cx + Math.cos(midAngle) * dotR;
+        const dy = cy + Math.sin(midAngle) * dotR;
+        ctx.beginPath();
+        ctx.arc(dx, dy, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = week.color;
+        ctx.fill();
+      });
+
+      // Center circle
+      const centerGrd = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.45);
+      centerGrd.addColorStop(0, '#1a1a1a');
+      centerGrd.addColorStop(1, '#0d0d0d');
+      ctx.beginPath();
+      ctx.arc(cx, cy, R * 0.46, 0, Math.PI * 2);
+      ctx.fillStyle = centerGrd;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Center text
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = `900 ${Math.max(13, R * 0.14)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('10 WEEKS', cx, cy - R * 0.06);
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = `${Math.max(9, R * 0.08)}px monospace`;
+      ctx.fillText('OJT JOURNEY', cx, cy + R * 0.12);
+
+      // Rotating hand
+      const handAngle = -Math.PI / 2 + (tick * 0.008) % (Math.PI * 2);
+      const handLen = R * 0.88;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(handAngle) * handLen, cy + Math.sin(handAngle) * handLen);
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 6]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Center dot
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      tick++;
+      animRef.current = requestAnimationFrame(draw);
+    };
+
+    const resize = () => {
+      const size = Math.min(canvas.parentElement.clientWidth, 520);
+      canvas.width = size;
+      canvas.height = size;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animRef.current);
+      window.removeEventListener('resize', resize);
+    };
   }, []);
 
-  const s = time.getSeconds();
-  const m = time.getMinutes();
-  const h = time.getHours() % 12;
-  const sDeg = s * 6;
-  const mDeg = m * 6 + s * 0.1;
-  const hDeg = h * 30 + m * 0.5;
-
-  const hand = (deg, len, width, color = "#2a2a2a") => {
-    const rad = ((deg - 90) * Math.PI) / 180;
-    return (
-      <line
-        x1="50" y1="50"
-        x2={50 + len * Math.cos(rad)}
-        y2={50 + len * Math.sin(rad)}
-        stroke={color}
-        strokeWidth={width}
-        strokeLinecap="round"
-      />
-    );
-  };
-
   return (
-    <div
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        cursor: "pointer",
-        transition: "transform 0.2s, filter 0.2s",
-        transform: hovered ? "scale(1.12) rotate(-3deg)" : "scale(1)",
-        filter: hovered ? "drop-shadow(0 4px 14px rgba(42,42,42,0.35))" : "none",
-      }}
-      title="Go to main page"
-    >
-      <svg width="80" height="80" viewBox="0 0 100 100">
-        {/* Outer ring */}
-        <circle cx="50" cy="50" r="46" fill="#f5f0e8" stroke="#2a2a2a" strokeWidth="2.5" />
-        <circle cx="50" cy="50" r="42" fill="none" stroke="#c0b8a8" strokeWidth="0.8" strokeDasharray="3,5" />
-        {/* Hour ticks */}
-        {Array.from({ length: 12 }).map((_, i) => {
-          const a = ((i * 30 - 90) * Math.PI) / 180;
-          const r1 = i % 3 === 0 ? 34 : 37;
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', padding: '40px 20px' }}>
+      <canvas ref={canvasRef} style={{ borderRadius: '50%', display: 'block' }} />
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: '10px',
+        maxWidth: '520px',
+        width: '100%'
+      }}>
+        {[
+          { w: 'W1', title: 'Research & Flowchart', dates: 'Feb 24–27' },
+          { w: 'W2', title: 'Frontend Dev', dates: 'Mar 2–6' },
+          { w: 'W3', title: 'Auth & Backend', dates: 'Mar 9–13' },
+          { w: 'W4', title: 'Real-time & UI', dates: 'Mar 16–20' },
+          { w: 'W5', title: 'Notif & Optimization', dates: 'Mar 25–31' },
+          { w: 'W6', title: 'Email & Booking', dates: 'Apr 1–9' },
+          { w: 'W7', title: 'Debugging & UX', dates: 'Apr 13–18' },
+          { w: 'W8', title: 'Room Config & Sync', dates: 'Apr 20–24' },
+          { w: 'W9', title: 'UI Refinements & Docs', dates: 'Apr 27–30' },
+          { w: 'W10', title: 'Presentation & Turnover', dates: 'May 1–4' },
+        ].map((item, i) => {
+          const colors = ['#4ade80','#60a5fa','#f472b6','#fb923c','#a78bfa','#34d399','#fbbf24','#f87171','#38bdf8','#e879f9'];
           return (
-            <line
-              key={i}
-              x1={50 + r1 * Math.cos(a)} y1={50 + r1 * Math.sin(a)}
-              x2={50 + 40 * Math.cos(a)} y2={50 + 40 * Math.sin(a)}
-              stroke="#2a2a2a" strokeWidth={i % 3 === 0 ? 2 : 1} strokeLinecap="round"
-            />
+            <div key={i} style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '8px 12px', borderRadius: '6px',
+              background: 'rgba(255,255,255,0.03)',
+              border: `1px solid ${colors[i]}33`
+            }}>
+              <span style={{ color: colors[i], fontSize: '11px', fontWeight: '700', fontFamily: 'monospace', minWidth: '28px' }}>{item.w}</span>
+              <div>
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '11px', fontWeight: '600' }}>{item.title}</div>
+                <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: '10px' }}>{item.dates}</div>
+              </div>
+            </div>
           );
         })}
-        {hand(hDeg, 24, 2.5)}
-        {hand(mDeg, 32, 2)}
-        {hand(sDeg, 36, 1, "#c0392b")}
-        <circle cx="50" cy="50" r="3" fill="#2a2a2a" />
-        {hovered && (
-          <text x="50" y="72" textAnchor="middle"
-            style={{ fontSize: 7, fontFamily: "'Caveat', cursive", fill: "#666" }}>
-            → home
-          </text>
-        )}
-      </svg>
-    </div>
-  );
-}
-
-// ── LOADING SCENE ─────────────────────────────────────────────────────────────
-const LoadingScene = ({ progress }) => (
-  <div style={{
-    position: "fixed", inset: 0, background: "#f0ece4",
-    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-    fontFamily: "'Caveat', cursive", zIndex: 100,
-  }}>
-    <PaperTexture />
-    <svg width="200" height="300" viewBox="0 0 200 300" style={{ marginBottom: 20 }}>
-      <polyline
-        points={`100,10 90,60 110,110 95,160 105,${160 + progress}`}
-        fill="none" stroke="#2a2a2a" strokeWidth="1.5" strokeLinecap="round"
-      />
-      <circle cx="105" cy={165 + progress} r="28" fill="none" stroke="#2a2a2a"
-        strokeWidth="1.5" strokeDasharray="5,3" />
-      <text x="105" y={170 + progress} textAnchor="middle" dominantBaseline="middle"
-        style={{ fontSize: 18, fontFamily: "'Caveat', cursive", fontWeight: 700, fill: "#2a2a2a" }}>
-        {progress}%
-      </text>
-    </svg>
-    <p style={{ fontSize: 14, color: "#666", letterSpacing: 3, textTransform: "uppercase", fontFamily: "serif" }}>
-      Loading your journey...
-    </p>
-  </div>
-);
-
-// ── ENTRANCE SCENE ────────────────────────────────────────────────────────────
-const EntranceScene = ({ onEnter, onGoHome, profileImage }) => {
-  const [doorHovered, setDoorHovered] = useState(false);
-  const [windowHovered, setWindowHovered] = useState(false);
-
-  const doorColors = {
-    left: doorHovered ? "#6b8cba" : "#eceae4",
-    right: doorHovered ? "#7a9cc9" : "#eceae4",
-    glow: doorHovered ? "drop-shadow(0 0 18px rgba(107,140,186,0.7))" : "none",
-    sticker1: doorHovered ? "#f0c040" : "#f0c040",
-    sticker2: doorHovered ? "#4db6e8" : "#4db6e8",
-  };
-
-  return (
-    <div style={{
-      minHeight: "100vh", background: "#ece8e0",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      position: "relative", overflow: "hidden",
-    }}>
-      <PaperTexture />
-
-      {/* Clock — top right */}
-      <div style={{ position: "absolute", top: 24, right: 24, zIndex: 50 }}>
-        <AnalogClock onClick={onGoHome} />
-        <p style={{
-          textAlign: "center", fontFamily: "serif", fontSize: 9,
-          color: "#999", letterSpacing: 2, marginTop: 4,
-        }}>CLICK TO GO HOME</p>
-      </div>
-
-      <svg
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-        viewBox="0 0 1000 600"
-        preserveAspectRatio="xMidYMid slice"
-      >
-        {/* Brick wall */}
-        {Array.from({ length: 12 }).map((_, row) =>
-          Array.from({ length: 14 }).map((_, col) => {
-            const offset = row % 2 === 0 ? 0 : 36;
-            const x = col * 72 + offset - 36;
-            const y = row * 46 + 20;
-            return (
-              <rect key={`${row}-${col}`} x={x} y={y} width="70" height="43"
-                fill="none" stroke="#c0b8a8" strokeWidth="0.8" rx="1" />
-            );
-          })
-        )}
-
-        {/* Tree */}
-        <ellipse cx="150" cy="220" rx="80" ry="90" fill="none" stroke="#2a2a2a" strokeWidth="1" />
-        <line x1="150" y1="310" x2="150" y2="560" stroke="#2a2a2a" strokeWidth="5" strokeLinecap="round" />
-        <line x1="150" y1="420" x2="80" y2="370" stroke="#2a2a2a" strokeWidth="3" />
-        <line x1="150" y1="440" x2="230" y2="400" stroke="#2a2a2a" strokeWidth="3" />
-
-        {/* Swing */}
-        <line x1="120" y1="310" x2="120" y2="390" stroke="#2a2a2a" strokeWidth="1" />
-        <line x1="160" y1="310" x2="160" y2="390" stroke="#2a2a2a" strokeWidth="1" />
-        <rect x="100" y="388" width="80" height="12" fill="none" stroke="#2a2a2a" strokeWidth="1.5" rx="2" />
-
-        {/* Cat */}
-        <ellipse cx="190" cy="510" rx="18" ry="12" fill="none" stroke="#2a2a2a" strokeWidth="1.2" />
-        <circle cx="190" cy="495" r="11" fill="none" stroke="#2a2a2a" strokeWidth="1.2" />
-        <polyline points="183,487 180,480" stroke="#2a2a2a" strokeWidth="1" />
-        <polyline points="197,487 200,480" stroke="#2a2a2a" strokeWidth="1" />
-        <line x1="208" y1="510" x2="228" y2="505" stroke="#2a2a2a" strokeWidth="1.2" />
-
-        {/* OJT JOURNEY sign */}
-        <rect x="380" y="200" width="240" height="55" fill="none" stroke="#2a2a2a" strokeWidth="2" rx="4" />
-        <text x="500" y="233" textAnchor="middle"
-          style={{ fontFamily: "'Special Elite', monospace", fontSize: 26, fill: "#2a2a2a", fontWeight: 700, letterSpacing: 3 }}>
-          OJT JOURNEY
-        </text>
-        <line x1="450" y1="200" x2="445" y2="175" stroke="#2a2a2a" strokeWidth="1.5" />
-        <line x1="550" y1="200" x2="555" y2="175" stroke="#2a2a2a" strokeWidth="1.5" />
-
-        {/* WINDOW — right side, hoverable */}
-        <g
-          style={{ cursor: "pointer" }}
-          onMouseEnter={() => setWindowHovered(true)}
-          onMouseLeave={() => setWindowHovered(false)}
-        >
-          {/* Window frame */}
-          <rect x="650" y="280" width="160" height="130" rx="4"
-            fill={windowHovered ? "#d4e8f5" : "#b8d4e8"}
-            stroke="#2a2a2a" strokeWidth="2.5" />
-          {/* Window panes */}
-          <line x1="730" y1="280" x2="730" y2="410" stroke="#2a2a2a" strokeWidth="2" />
-          <line x1="650" y1="345" x2="810" y2="345" stroke="#2a2a2a" strokeWidth="2" />
-          {/* Sill */}
-          <rect x="640" y="408" width="180" height="10" rx="2" fill="#c0b8a8" stroke="#2a2a2a" strokeWidth="1.5" />
-
-          {/* Peek photo / face when hovered */}
-          {windowHovered && (
-            <g style={{ animation: "peekIn 0.3s ease" }}>
-              {profileImage ? (
-                <image
-                  href={profileImage}
-                  x="671" y="308"
-                  width="116" height="95"
-                  clipPath="url(#windowClip)"
-                  preserveAspectRatio="xMidYMid slice"
-                />
-              ) : (
-                /* Placeholder cartoon face peeking */
-                <g>
-                  <ellipse cx="730" cy="380" rx="38" ry="32" fill="#f5d5b0" stroke="#2a2a2a" strokeWidth="1.5" />
-                  <circle cx="718" cy="368" r="5" fill="#2a2a2a" />
-                  <circle cx="742" cy="368" r="5" fill="#2a2a2a" />
-                  <circle cx="719" cy="367" r="2" fill="white" />
-                  <circle cx="743" cy="367" r="2" fill="white" />
-                  <path d="M719,382 Q730,390 741,382" fill="none" stroke="#2a2a2a" strokeWidth="1.5" strokeLinecap="round" />
-                  {/* Hair */}
-                  <path d="M692,360 Q700,335 730,332 Q760,335 768,360" fill="#3a2a1a" stroke="#2a2a2a" strokeWidth="1" />
-                  {/* Hands gripping sill */}
-                  <ellipse cx="700" cy="408" rx="14" ry="9" fill="#f5d5b0" stroke="#2a2a2a" strokeWidth="1.2" />
-                  <ellipse cx="760" cy="408" rx="14" ry="9" fill="#f5d5b0" stroke="#2a2a2a" strokeWidth="1.2" />
-                  <text x="730" y="418" textAnchor="middle"
-                    style={{ fontSize: 8, fontFamily: "'Caveat', cursive", fill: "#666" }}>
-                    👋 hi!
-                  </text>
-                </g>
-              )}
-            </g>
-          )}
-          {!windowHovered && (
-            <text x="730" y="350" textAnchor="middle"
-              style={{ fontSize: 10, fontFamily: "'Caveat', cursive", fill: "#888" }}>
-              peek →
-            </text>
-          )}
-
-          {/* Window clip */}
-          <defs>
-            <clipPath id="windowClip">
-              <rect x="651" y="281" width="158" height="127" rx="3" />
-            </clipPath>
-          </defs>
-        </g>
-
-        {/* DOUBLE DOORS — hoverable & clickable */}
-        <g
-          style={{
-            cursor: "pointer",
-            filter: doorColors.glow,
-            transition: "filter 0.3s",
-          }}
-          onMouseEnter={() => setDoorHovered(true)}
-          onMouseLeave={() => setDoorHovered(false)}
-          onClick={onEnter}
-        >
-          {/* Door frame */}
-          <rect x="418" y="318" width="164" height="204" rx="3"
-            fill="none" stroke="#2a2a2a" strokeWidth="2.5" />
-          {/* Left door */}
-          <rect x="420" y="320" width="80" height="200"
-            fill={doorColors.left} stroke="#2a2a2a" strokeWidth="1.8"
-            style={{ transition: "fill 0.3s" }} />
-          {/* Right door */}
-          <rect x="500" y="320" width="80" height="200"
-            fill={doorColors.right} stroke="#2a2a2a" strokeWidth="1.8"
-            style={{ transition: "fill 0.3s" }} />
-          {/* Door center line */}
-          <line x1="500" y1="320" x2="500" y2="520" stroke="#2a2a2a" strokeWidth="2" />
-          {/* Panels */}
-          <rect x="428" y="330" width="65" height="80" fill="none" stroke="#2a2a2a" strokeWidth="1" rx="2" />
-          <rect x="428" y="420" width="65" height="90" fill="none" stroke="#2a2a2a" strokeWidth="1" rx="2" />
-          <rect x="507" y="330" width="65" height="80" fill="none" stroke="#2a2a2a" strokeWidth="1" rx="2" />
-          <rect x="507" y="420" width="65" height="90" fill="none" stroke="#2a2a2a" strokeWidth="1" rx="2" />
-          {/* Handles */}
-          <circle cx="494" cy="430" r="5" fill="#d4a840" stroke="#2a2a2a" strokeWidth="1.5" />
-          <circle cx="506" cy="430" r="5" fill="#d4a840" stroke="#2a2a2a" strokeWidth="1.5" />
-
-          {/* JS sticker */}
-          <circle cx="448" cy="360" r="14" fill={doorHovered ? "#ffd700" : "#f0c040"} stroke="#2a2a2a" strokeWidth="1"
-            style={{ transition: "fill 0.3s" }} />
-          <text x="448" y="364" textAnchor="middle"
-            style={{ fontSize: 8, fontFamily: "monospace", fontWeight: 700, fill: "#2a2a2a" }}>JS</text>
-
-          {/* TS sticker */}
-          <circle cx="448" cy="398" r="14" fill={doorHovered ? "#60c8ff" : "#4db6e8"} stroke="#2a2a2a" strokeWidth="1"
-            style={{ transition: "fill 0.3s" }} />
-          <text x="448" y="402" textAnchor="middle"
-            style={{ fontSize: 7, fontFamily: "monospace", fontWeight: 700, fill: "white" }}>TS</text>
-
-          {/* Hover hint */}
-          {doorHovered && (
-            <text x="500" y="540" textAnchor="middle"
-              style={{ fontSize: 12, fontFamily: "'Caveat', cursive", fill: "#6b8cba" }}>
-              Enter the hallway ›
-            </text>
-          )}
-        </g>
-
-        {/* Stone path */}
-        {[[480, 545, 90, 28], [460, 578, 100, 26], [380, 554, 78, 26],
-          [560, 548, 82, 26], [590, 580, 88, 26]].map(([cx, cy, rx, ry], i) => (
-          <ellipse key={i} cx={cx} cy={cy} rx={rx} ry={ry}
-            fill="none" stroke="#2a2a2a" strokeWidth="1" />
-        ))}
-      </svg>
-
-      {/* Bottom bar */}
-      <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0,
-        background: "rgba(240,236,228,0.94)", borderTop: "1px solid #2a2a2a",
-        padding: "14px 0", textAlign: "center",
-      }}>
-        <p style={{
-          fontFamily: "'Special Elite', monospace", fontSize: 15,
-          color: "#2a2a2a", margin: 0, letterSpacing: 3,
-        }}>EXPLORER</p>
-        <p style={{
-          fontFamily: "'Caveat', cursive", fontSize: 13, color: "#888",
-          margin: "4px 0 0", letterSpacing: 1,
-        }}>
-          Click the door to walk the hallway · Hover the window to say hi · Click the clock to go home
-        </p>
       </div>
     </div>
   );
 };
 
-// ── HALLWAY (SCROLL-TRIGGERED) ────────────────────────────────────────────────
-const HallwayScene = ({ onBack }) => {
-  const containerRef = useRef(null);
-  const [activePanel, setActivePanel] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
+// ─── MAIN PORTFOLIO ───────────────────────────────────────────────────────────
+const DevianPortfolio = () => {
+  const heroSceneRef = useRef(null);
+  const heroAfterRef = useRef(null);
+  const marqueeTrackRef = useRef(null);
+  const contactInnerRef = useRef(null);
+  const creativeSectionRef = useRef(null);
+  const wordsSectionRef = useRef(null);
+  const wordTextRef = useRef(null);
+  const statsSectionRef = useRef(null);
+  const expertiseSectionRef = useRef(null);
+  const worksSectionRef = useRef(null);
+  const contactSectionRef = useRef(null);
+
+  const [selectedWork, setSelectedWork] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedWeek, setSelectedWeek] = useState(null);
+  const [isWeekModalOpen, setIsWeekModalOpen] = useState(false);
+  const [showClock, setShowClock] = useState(false);
+
+
+  const weeksData = [
+    {
+      id: '01',
+      name: 'WEEK ONE',
+      dates: 'February 24–27, 2026',
+      category: 'RESEARCH & SYSTEM ANALYSIS',
+      description: 'Focused on research and development related to seat and table management systems used in hotels, restaurants, and event venues. Analyzed existing reservation platforms and studied their workflows, functionalities, and user interfaces.',
+      topics: 'System Research, Competitor Analysis, Flowchart Design, UI/UX Wireframing',
+      duration: '4 days',
+      outcomes: 'Created comparison tables, designed initial system flowcharts for client and admin sides, and produced initial UI/UX layout concepts for the landing page, reservation pages, and dashboard interfaces.',
+      images: [
+        'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&q=80&fit=crop'
+      ]
+    },
+    {
+      id: '02',
+      name: 'WEEK TWO',
+      dates: 'March 2–6, 2026',
+      category: 'FRONTEND DEVELOPMENT',
+      description: 'Officially started the development phase with a focus on front-end development for both client and admin sides of the Seat and Table Reservation Management System.',
+      topics: 'Client Landing Page, All Venues Page, Seat Map Layout, Admin Dashboard, Login Page',
+      duration: '5 days',
+      outcomes: 'Developed the client-side landing page, "All Venues" page, seat/table layouts, admin login page, admin dashboard, and seat map editor. Implemented table/seat add-delete functions and improved UI consistency.',
+      images: [
+        'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1547658719-da2b51169166?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=600&q=80&fit=crop'
+      ]
+    },
+    {
+      id: '03',
+      name: 'WEEK THREE',
+      dates: 'March 9–13, 2026',
+      category: 'AUTHENTICATION & BACKEND',
+      description: 'Focused on authentication, backend integration, and real-time reservation synchronization between the client and admin systems.',
+      topics: 'Authentication, Postman API Testing, Database Integration, Role-Based Access, Notifications',
+      duration: '5 days',
+      outcomes: 'Implemented login authentication, connected backend with Postman for API testing, displayed reservation data in admin panels, configured Main Wing and Tower Wing seat maps, and added navigation notification icon.',
+      images: [
+        'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&q=80&fit=crop'
+      ]
+    },
+    {
+      id: '04',
+      name: 'WEEK FOUR',
+      dates: 'March 16–20, 2026',
+      category: 'REAL-TIME FEATURES & UI',
+      description: 'Focused on fixing system issues, improving user experience, and implementing real-time functionalities including WebSocket integration.',
+      topics: 'WebSocket Integration, Notification Dashboard, Real-time Sync, Pagination, Responsiveness',
+      duration: '5 days',
+      outcomes: 'Fixed connection errors, corrected seat status color legends, built and connected Notification Dashboard to database, implemented WebSocket for live updates, improved dashboard responsiveness and time formatting.',
+      images: [
+        'https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80&fit=crop'
+      ]
+    },
+    {
+      id: '05',
+      name: 'WEEK FIVE',
+      dates: 'March 25–31, 2026',
+      category: 'NOTIFICATION & OPTIMIZATION',
+      description: 'Enhanced notification management and implemented booking management functionalities with code optimization.',
+      topics: 'Manage Booking, Edit/Delete Notifications, Pagination, Mobile Responsiveness, Code Splitting',
+      duration: '5 days',
+      outcomes: 'Added edit/delete for notifications with pagination, implemented auto-deletion for removed seats/tables, developed Manage Booking (cancel/edit/reschedule/rebook), added sorting by most recent, and optimized code structure.',
+      images: [
+        'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=600&q=80&fit=crop'
+      ]
+    },
+    {
+      id: '06',
+      name: 'WEEK SIX',
+      dates: 'April 1–9, 2026',
+      category: 'EMAIL & BOOKING INTEGRATION',
+      description: 'Improved the Manage Booking module with database integration and implemented a complete email notification system using Gmail SMTP.',
+      topics: 'Gmail SMTP, Email Templates, Booking Search, Forgot Reference Code, Dynamic Venue Creation',
+      duration: '7 days',
+      outcomes: 'Integrated Manage Booking with database, added search/validation/cancellation features, implemented email notifications for pending/approved/rejected/cancelled statuses, added Forgot Reference Code feature, and improved UI across multiple pages.',
+      images: [
+        'https://images.unsplash.com/photo-1596526131083-e8c633064f28?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1557200134-90327ee9fafa?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=600&q=80&fit=crop'
+      ]
+    },
+    {
+      id: '07',
+      name: 'WEEK SEVEN',
+      dates: 'April 13–18, 2026',
+      category: 'DEBUGGING & UX ENHANCEMENTS',
+      description: 'Focused on debugging reservation logic, improving validations, and enhancing user experience across multiple system components.',
+      topics: 'Booking Cancellation Fix, Seat Validation, Mobile UX, Email Template Redesign, Dark/Light Mode',
+      duration: '5 days',
+      outcomes: 'Fixed booking cancellation errors, seat limits, and invalid statuses. Improved Notifications mobile layout, added Select All bulk delete, redesigned email templates, fixed homepage animations and carousel, and implemented email subscription flow.',
+      images: [
+        'https://images.unsplash.com/photo-1607252650355-f7fd0460ccdb?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1512486130939-2c4f79935e4f?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=600&q=80&fit=crop'
+      ]
+    },
+    {
+      id: '08',
+      name: 'WEEK EIGHT',
+      dates: 'April 20–24, 2026',
+      category: 'ROOM CONFIG & SYNC FIXES',
+      description: 'Completed room configurations for Main Wing, Tower Wing, and Dining areas, and resolved critical reservation synchronization issues.',
+      topics: 'Room Configuration, Subroom Setup, Seat Color States, Approval Workflow, Reservation Persistence',
+      duration: '5 days',
+      outcomes: 'Added 20/20 Function Rooms and Laguna Ballroom configurations. Fixed seat color states, modal handling, reservation persistence bugs, and ensured approved reservations reflected correct reserved status in real time.',
+      images: [
+        'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1431540015161-0bf868a2d407?w=600&q=80&fit=crop'
+      ]
+    },
+    {
+      id: '09',
+      name: 'WEEK NINE',
+      dates: 'April 27–30, 2026',
+      category: 'UI REFINEMENTS & DOCUMENTATION',
+      description: 'Final UI refinements, synchronization fixes across Tower Wing, and thorough system documentation for future maintainers.',
+      topics: 'Modal Standardization, Sync Fixes, API Documentation, ReservationPass Design, Notification Cleanup',
+      duration: '4 days',
+      outcomes: 'Fixed invisible modal pop-ups and inconsistent designs in Main Wing rooms. Standardized modal interfaces, fixed Tower Wing seat sync, documented APIs and database seeders, and developed ReservationPass design using Inter font.',
+      images: [
+        'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1565106430482-8f6e74349ca1?w=600&q=80&fit=crop'
+      ]
+    },
+    {
+      id: '10',
+      name: 'WEEK TEN',
+      dates: 'May 1–4, 2026',
+      category: 'PRESENTATION & PROJECT TURNOVER',
+      description: 'Final week dedicated to preparing the system for presentation to the Chief Information Officer and executing a complete project turnover.',
+      topics: 'System Review, CIO Presentation, Documentation, Project Endorsement, Recommendations',
+      duration: '4 days',
+      outcomes: 'Reviewed all modules end-to-end, presented to Sir Mark Jerome Castillo (CIO), finalized presentation materials and documentation, documented revisions and pending improvements, and endorsed the system to the next OJT trainee.',
+      images: [
+        'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80&fit=crop',
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80&fit=crop'
+      ]
+    }
+  ];
+
+  const openModal = (work) => {
+    setSelectedWork(work);
+    setIsModalOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedWork(null);
+    document.body.style.overflow = 'unset';
+  };
+
+  const openWeekModal = (week) => {
+    setSelectedWeek(week);
+    setIsWeekModalOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeWeekModal = () => {
+    setIsWeekModalOpen(false);
+    setSelectedWeek(null);
+    document.body.style.overflow = 'unset';
+  };
 
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      const max = el.scrollHeight - el.clientHeight;
-      const pct = el.scrollTop / max;
-      setScrollProgress(pct);
-      const idx = Math.min(
-        hallwayPanels.length - 1,
-        Math.floor(pct * hallwayPanels.length)
-      );
-      setActivePanel(idx);
+    const timer = setTimeout(() => {
+      ScrollTrigger.refresh();
+
+      const heroScene = heroSceneRef.current;
+      const heroAfter = heroAfterRef.current;
+      const heroSection = document.querySelector('#hero');
+
+      if (heroScene && heroAfter && heroSection) {
+        gsap.to(heroScene, {
+          scale: 20,
+          transformOrigin: '50% 50%',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: heroSection,
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: 1.2,
+            onUpdate(self) {
+              const p = self.progress;
+              const sceneAlpha = p < 0.55 ? 1 : gsap.utils.mapRange(0.55, 0.72, 1, 0, p);
+              const afterAlpha = p < 0.60 ? 0 : gsap.utils.mapRange(0.60, 0.78, 0, 1, p);
+              heroScene.style.opacity = Math.max(0, sceneAlpha);
+              heroAfter.style.opacity = Math.min(1, Math.max(0, afterAlpha));
+            }
+          }
+        });
+      }
+
+      const heroImgs = document.querySelectorAll('.hero__img');
+      if (heroImgs.length > 0) {
+        gsap.from(heroImgs, { opacity: 0, y: 50, scale: 0.92, stagger: 0.1, duration: 1, delay: 0.2, ease: 'power3.out' });
+      }
+
+      const creativeSection = creativeSectionRef.current;
+      if (creativeSection) {
+        const words = creativeSection.querySelectorAll('.creative__word');
+        if (words.length > 0) {
+          gsap.to(words, {
+            y: 0, stagger: 0.18, duration: 0.9, ease: 'power3.out',
+            scrollTrigger: { trigger: creativeSection, start: 'top 65%', toggleActions: 'play none none reverse' }
+          });
+        }
+      }
+
+      const wordText = wordTextRef.current;
+      if (wordText) {
+        const wordSpans = wordText.querySelectorAll('span');
+        const total = wordSpans.length;
+        wordSpans.forEach((span, i) => {
+          const startPct = (i / total) * 70;
+          const endPct = ((i + 1) / total) * 70 + 8;
+          gsap.to(span, {
+            opacity: 1, y: 0, ease: 'none',
+            scrollTrigger: {
+              trigger: wordsSectionRef.current,
+              start: `top+=${startPct}% top`,
+              end: `top+=${endPct}% top`,
+              scrub: 0.5
+            }
+          });
+        });
+      }
+
+      const statsSection = statsSectionRef.current;
+      if (statsSection) {
+        const stats = statsSection.querySelectorAll('.stat');
+        if (stats.length > 0) {
+          gsap.to(stats, {
+            opacity: 1, y: 0, stagger: 0.12, duration: 0.8, ease: 'power3.out',
+            scrollTrigger: { trigger: statsSection, start: 'top 75%', toggleActions: 'play none none reverse' }
+          });
+        }
+      }
+
+      const expertiseSection = expertiseSectionRef.current;
+      if (expertiseSection) {
+        const services = expertiseSection.querySelectorAll('.service');
+        services.forEach((el, i) => {
+          gsap.to(el, {
+            opacity: 1, x: 0, duration: 0.8, delay: i * 0.1, ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none reverse' }
+          });
+        });
+      }
+
+      const worksSection = worksSectionRef.current;
+      if (worksSection) {
+        const workItems = worksSection.querySelectorAll('.work-item');
+        if (workItems.length > 0) {
+          gsap.from(workItems, {
+            opacity: 0, y: 70, stagger: 0.1, duration: 0.7, ease: 'power3.out',
+            scrollTrigger: { trigger: worksSection, start: 'top 85%', toggleActions: 'play none none none' }
+          });
+        }
+      }
+
+      const contactInner = contactInnerRef.current;
+      const contactSection = contactSectionRef.current;
+      if (contactInner && contactSection) {
+        gsap.to(contactInner, {
+          opacity: 1, scale: 1, duration: 1, ease: 'back.out(1.2)',
+          scrollTrigger: { trigger: contactSection, start: 'top 70%', toggleActions: 'play none none reverse' }
+        });
+      }
+
+      const track = marqueeTrackRef.current;
+      if (track) {
+        track.innerHTML += track.innerHTML;
+        const trackWidth = track.scrollWidth / 2;
+        gsap.to(track, { x: -trackWidth, duration: 22, ease: 'none', repeat: -1 });
+      }
+    }, 200);
+
+    return () => {
+      clearTimeout(timer);
+      ScrollTrigger.getAll().forEach(t => t.kill());
     };
-    el.addEventListener("scroll", onScroll);
-    return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
-  const panel = hallwayPanels[activePanel];
-
-  // Perspective vanish amount based on scroll
-  const vanish = 80 + scrollProgress * 120;
-  const wallW = 300 + scrollProgress * 100;
-
   return (
-    <div
-      ref={containerRef}
-      style={{
-        height: "100vh",
-        overflowY: "scroll",
-        position: "relative",
-        background: "#eceae4",
-        scrollBehavior: "smooth",
-      }}
-    >
-      <PaperTexture />
+    <>
+      <style>{`
+        *{box-sizing:border-box;margin:0;padding:0}
+        :root{--black:#0a0a0a;--white:#ffffff;--gray:#f5f5f5}
+        html{scroll-behavior:smooth}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--white);color:var(--black);overflow-x:hidden}
+        img{display:block;width:100%;height:100%;object-fit:cover}
 
-      {/* Tall scroll canvas — creates scroll room */}
-      <div style={{ height: `${hallwayPanels.length * 100}vh`, position: "relative" }}>
+        .nav{position:fixed;top:0;left:0;width:100%;z-index:200;pointer-events:none}
+        .nav__inner{max-width:1280px;margin:0 auto;padding:24px 40px;display:flex;align-items:center;justify-content:space-between}
+        .nav a,.nav button,.nav span{pointer-events:auto;color:var(--black);text-decoration:none;font-size:13px;font-weight:600;letter-spacing:0.05em}
+        .nav__logo{font-size:20px;font-weight:800;color:var(--black)}
+        .nav__links{display:flex;gap:40px}
+        .nav__cta{border:1px solid var(--black);padding:10px 22px;background:transparent;cursor:pointer;font-size:11px;letter-spacing:0.12em;font-weight:700}
 
-        {/* Sticky viewport */}
-        <div style={{
-          position: "sticky", top: 0, height: "100vh",
-          display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center",
-          overflow: "hidden",
-        }}>
+        .hero{position:relative;height:380vh;background:var(--white)}
+        .hero__sticky{position:sticky;top:0;height:100vh;overflow:hidden}
+        .hero__scene{position:absolute;inset:0;transform-origin:50% 50%;will-change:transform}
+        .hero__wordmark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;user-select:none;z-index:2}
+        .hero__wordmark span{font-size:12vw;font-weight:900;line-height:1;letter-spacing:-0.04em;color:var(--black)}
+        .hero__img{position:absolute;overflow:hidden;z-index:1}
+        .hero__after{position:absolute;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;pointer-events:none;z-index:10}
+        .hero__after h1{font-size:13vw;font-weight:900;color:var(--white);line-height:0.85;letter-spacing:-0.04em;text-align:center}
+        .hero__after h1.dim{color:rgba(255,255,255,0.15)}
 
-          {/* Hallway SVG */}
-          <svg
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-            viewBox="0 0 1000 600"
-            preserveAspectRatio="xMidYMid slice"
-          >
-            <defs>
-              <radialGradient id="hallGlow" cx="50%" cy="65%">
-                <stop offset="0%" stopColor="white" stopOpacity="0.95" />
-                <stop offset="60%" stopColor="#eceae4" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#eceae4" stopOpacity="0" />
-              </radialGradient>
-            </defs>
+        .creative{background:var(--black);padding:140px 40px;text-align:center;overflow:hidden;position:relative}
+        .creative h1{font-size:clamp(60px,11vw,160px);font-weight:900;color:var(--white);line-height:0.85;letter-spacing:-0.04em}
+        .creative h1.dim{color:rgba(255,255,255,0.12)}
+        .creative__line{overflow:hidden}
+        .creative__word{display:inline-block;transform:translateY(110%)}
+        .creative p{margin-top:56px;color:rgba(255,255,255,0.35);font-size:12px;letter-spacing:0.3em;text-transform:uppercase}
 
-            {/* Ceiling */}
-            <line x1="0" y1="100" x2="1000" y2="100" stroke="#c0b8a8" strokeWidth="1" />
-            {/* Ceiling cracks */}
-            <line x1="200" y1="100" x2="182" y2="65" stroke="#b0a898" strokeWidth="0.7" />
-            <line x1="700" y1="100" x2="718" y2="72" stroke="#b0a898" strokeWidth="0.7" />
+        .words{position:relative;height:250vh;background:var(--white)}
+        .words__sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;padding:0 40px}
+        .words__text{max-width:900px;text-align:center;font-size:clamp(28px,5vw,68px);font-weight:900;line-height:1.15}
+        .words__text span{display:inline-block;margin:0 12px 8px 0;color:var(--black);opacity:0.07;transform:translateY(20px)}
 
-            {/* Left wall perspective */}
-            <line x1="0" y1="100" x2={500 - vanish} y2={240 + scrollProgress * 60}
-              stroke="#2a2a2a" strokeWidth="1.2" />
-            <line x1="0" y1="600" x2={500 - vanish} y2={430 - scrollProgress * 40}
-              stroke="#2a2a2a" strokeWidth="1.2" />
+        .stats{background:var(--white);padding:80px 40px;border-top:1px solid rgba(0,0,0,0.06)}
+        .stats__grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(2,1fr);gap:48px}
+        .stat{text-align:center;opacity:0;transform:translateY(40px)}
+        .stat__val{font-size:clamp(28px,5vw,72px);font-weight:900;letter-spacing:-0.04em;line-height:1.1}
+        .stat__label{margin-top:8px;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(0,0,0,0.4)}
 
-            {/* Right wall perspective */}
-            <line x1="1000" y1="100" x2={500 + vanish} y2={240 + scrollProgress * 60}
-              stroke="#2a2a2a" strokeWidth="1.2" />
-            <line x1="1000" y1="600" x2={500 + vanish} y2={430 - scrollProgress * 40}
-              stroke="#2a2a2a" strokeWidth="1.2" />
+        .expertise{background:var(--black);padding:80px 40px 100px}
+        .expertise__tag{font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:16px}
+        .expertise__title{font-size:clamp(40px,7vw,96px);font-weight:900;color:var(--white);letter-spacing:-0.04em;margin-bottom:16px}
+        .expertise__header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:40px}
 
-            {/* Vanishing glow */}
-            <ellipse cx="500" cy="380" rx={130 - scrollProgress * 30} ry={100 - scrollProgress * 20}
-              fill="url(#hallGlow)" />
+        .clock-toggle-btn{
+          display:inline-flex;align-items:center;gap:8px;
+          border:1px solid rgba(255,255,255,0.25);
+          background:transparent;
+          color:rgba(255,255,255,0.6);
+          font-size:10px;letter-spacing:0.2em;text-transform:uppercase;
+          padding:12px 20px;cursor:pointer;
+          transition:all 0.25s;font-family:inherit;
+        }
+        .clock-toggle-btn:hover{border-color:var(--white);color:var(--white)}
+        .clock-toggle-btn.active{border-color:#a78bfa;color:#a78bfa;background:rgba(167,139,250,0.08)}
 
-            {/* Floor boards */}
-            {Array.from({ length: 10 }).map((_, i) => (
-              <line key={i}
-                x1={i * 90} y1={600}
-                x2={440 + i * 12} y2={430}
-                stroke="#c0b8a8" strokeWidth="0.7" />
-            ))}
+        .clock-panel{
+          overflow:hidden;
+          max-height:0;
+          transition:max-height 0.6s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease;
+          opacity:0;
+        }
+        .clock-panel.open{
+          max-height:900px;
+          opacity:1;
+        }
+        .clock-panel-inner{
+          border:1px solid rgba(255,255,255,0.07);
+          border-radius:8px;
+          margin-bottom:48px;
+          background:rgba(255,255,255,0.02);
+          overflow:hidden;
+        }
 
-            {/* Wall art / panel specific content */}
-            {panel.hasArtwork && (
-              <g>
-                <rect x="740" y="220" width="180" height="150"
-                  fill="none" stroke="#2a2a2a" strokeWidth="2" rx="2" />
-                <rect x="748" y="228" width="164" height="134"
-                  fill="none" stroke="#2a2a2a" strokeWidth="0.7" />
-                <text x="830" y="308" textAnchor="middle"
-                  style={{ fontFamily: "'Caveat', cursive", fontSize: 40, fill: "#2a2a2a" }}>
-                  {panel.artworkText}
-                </text>
-              </g>
-            )}
+        .service{border-top:1px solid rgba(255,255,255,0.08);padding:48px 0;display:flex;gap:40px;opacity:0;transform:translateX(-60px);cursor:pointer;transition:transform 0.3s ease}
+        .service:hover{transform:translateX(10px)!important}
+        .service__num{font-size:12px;font-family:monospace;color:rgba(255,255,255,0.2);width:48px;flex-shrink:0;padding-top:4px}
+        .service__body{flex:1}
+        .service__name{font-size:clamp(20px,3.5vw,48px);font-weight:900;color:var(--white);letter-spacing:-0.03em;margin-bottom:8px}
+        .service__dates{font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-bottom:10px}
+        .service__desc{font-size:13px;color:rgba(255,255,255,0.38);line-height:1.7;max-width:480px}
+        .service__more{display:inline-block;margin-top:16px;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.4);text-decoration:none;background:none;border:none;cursor:pointer;font-family:inherit;padding:0}
+        .service__more:hover{color:var(--white)}
+        .service__tag{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.18);padding-top:4px;white-space:nowrap}
 
-            {/* Skills tags for about panel */}
-            {panel.skills && panel.skills.map((s, i) => (
-              <g key={s}>
-                <rect
-                  x={640 + (i % 2) * 120} y={260 + Math.floor(i / 2) * 60}
-                  width={108} height={42}
-                  fill="none" stroke="#2a2a2a" strokeWidth="1" rx="21" strokeDasharray="3,2"
-                />
-                <text
-                  x={694 + (i % 2) * 120} y={286 + Math.floor(i / 2) * 60}
-                  textAnchor="middle"
-                  style={{ fontFamily: "'Caveat', cursive", fontSize: 16, fill: "#2a2a2a" }}
-                >{s}</text>
-              </g>
-            ))}
+        .marquee{background:var(--black);border-top:1px solid rgba(255,255,255,0.05);overflow:hidden;padding:28px 0}
+        .marquee__track{display:flex;gap:48px;white-space:nowrap;will-change:transform}
+        .marquee__track span{font-size:clamp(40px,7vw,80px);font-weight:900;color:rgba(255,255,255,0.07);letter-spacing:-0.03em;flex-shrink:0}
 
-            {/* Milestone circle */}
-            {panel.percent && (
-              <g>
-                <circle cx="800" cy="320" r="60" fill="none" stroke="#2a2a2a"
-                  strokeWidth="2" strokeDasharray="6,3" />
-                <text x="800" y="316" textAnchor="middle"
-                  style={{ fontSize: 26, fontFamily: "'Caveat', cursive", fontWeight: 700, fill: "#2a2a2a" }}>
-                  {panel.percent}%
-                </text>
-                <text x="800" y="336" textAnchor="middle"
-                  style={{ fontSize: 11, fontFamily: "serif", fill: "#888", letterSpacing: 2 }}>
-                  DONE
-                </text>
-              </g>
-            )}
+        .works{background:var(--black);padding:60px 40px 80px;border-top:1px solid rgba(255,255,255,0.05)}
+        .works__header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:56px;flex-wrap:wrap;gap:20px}
+        .works__title{font-size:clamp(36px,7vw,96px);font-weight:900;color:var(--white);letter-spacing:-0.04em}
+        .works__title span{color:rgba(255,255,255,0.15)}
+        .work-item{border-top:1px solid rgba(255,255,255,0.07);padding:28px 0;display:flex;align-items:center;gap:20px;cursor:pointer;position:relative;overflow:hidden;transition:transform 0.25s ease}
+        .work-item:hover{transform:translateX(14px)!important}
+        .work-item::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0.02);transform:scaleX(0);transform-origin:left;transition:transform 0.3s ease}
+        .work-item:hover::before{transform:scaleX(1)}
+        .work__num{font-size:11px;font-family:monospace;color:rgba(255,255,255,0.18);width:36px;flex-shrink:0}
+        .work__name{font-size:clamp(20px,3.5vw,48px);font-weight:900;color:var(--white);letter-spacing:-0.03em;flex:1}
+        .work__cat{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.25)}
+        .work__arrow{color:rgba(255,255,255,0.35);font-size:18px;margin-left:12px}
 
-            {/* Final — person illustration */}
-            {panel.isFinal && (
-              <g>
-                <circle cx="800" cy="280" r="38" fill="none" stroke="#2a2a2a" strokeWidth="2" />
-                <line x1="800" y1="318" x2="800" y2="400" stroke="#2a2a2a" strokeWidth="2.5" />
-                <line x1="770" y1="345" x2="830" y2="345" stroke="#2a2a2a" strokeWidth="2.5" />
-                <line x1="800" y1="400" x2="774" y2="450" stroke="#2a2a2a" strokeWidth="2.5" />
-                <line x1="800" y1="400" x2="826" y2="450" stroke="#2a2a2a" strokeWidth="2.5" />
-                <circle cx="789" cy="272" r="8" fill="none" stroke="#2a2a2a" strokeWidth="1.5" />
-                <circle cx="811" cy="272" r="8" fill="none" stroke="#2a2a2a" strokeWidth="1.5" />
-                <line x1="797" y1="272" x2="803" y2="272" stroke="#2a2a2a" strokeWidth="1.5" />
-                <path d="M789,290 Q800,298 811,290" fill="none" stroke="#2a2a2a" strokeWidth="1.5" strokeLinecap="round" />
-              </g>
-            )}
+        .contact{background:var(--black);padding:120px 24px 100px;text-align:center;position:relative;overflow:hidden}
+        .contact::before,.contact::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:1px solid rgba(255,255,255,0.04);pointer-events:none}
+        .contact::before{width:80vw;height:80vw}
+        .contact::after{width:50vw;height:50vw;border-color:rgba(255,255,255,0.06)}
+        .contact__inner{position:relative;z-index:2;opacity:0;transform:scale(0.85)}
+        .contact__eyebrow{font-size:10px;letter-spacing:0.4em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:28px}
+        .contact__cta{font-size:clamp(36px,8vw,110px);font-weight:900;color:var(--white);letter-spacing:-0.04em;line-height:0.9;margin-bottom:52px}
+        .contact__btn{display:inline-block;border:1px solid var(--white);color:var(--white);font-size:11px;letter-spacing:0.25em;text-transform:uppercase;padding:18px 48px;text-decoration:none;transition:background 0.3s,color 0.3s}
+        .contact__btn:hover{background:var(--white);color:var(--black)}
 
-            {/* Room label sign */}
-            <rect x="430" y="248" width="140" height="34" fill="none" stroke="#2a2a2a" strokeWidth="1.5" rx="3" />
-            <text x="500" y="270" textAnchor="middle"
-              style={{ fontFamily: "'Special Elite', monospace", fontSize: 11, fill: "#2a2a2a", letterSpacing: 2 }}>
-              {panel.roomLabel}
-            </text>
+        .footer{background:var(--black);border-top:1px solid rgba(255,255,255,0.05);padding:36px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
+        .footer__logo{font-size:22px;font-weight:900;color:var(--white)}
+        .footer__links{display:flex;gap:32px}
+        .footer__links a{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-decoration:none;transition:color 0.2s}
+        .footer__links a:hover{color:var(--white)}
+        .footer__copy{font-size:10px;color:rgba(255,255,255,0.18)}
 
-            {/* Left wall door — decorative */}
-            <rect x="80" y="310" width="100" height="180" fill="#e8dcc8" stroke="#2a2a2a" strokeWidth="1.5" rx="2" />
-            <rect x="88" y="318" width="84" height="75" fill="none" stroke="#2a2a2a" strokeWidth="1" rx="2" />
-            <rect x="88" y="402" width="84" height="80" fill="none" stroke="#2a2a2a" strokeWidth="1" rx="2" />
-            <circle cx="170" cy="445" r="5" fill="#d4a840" stroke="#2a2a2a" strokeWidth="1.2" />
-          </svg>
+        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:opacity 0.3s,visibility 0.3s}
+        .modal.active{opacity:1;visibility:visible}
+        .modal__content{background:var(--white);max-width:800px;width:90%;max-height:80vh;overflow-y:auto;border-radius:8px;transform:scale(0.9);transition:transform 0.3s;position:relative}
+        .modal.active .modal__content{transform:scale(1)}
+        .modal__header{padding:40px;border-bottom:1px solid rgba(0,0,0,0.1)}
+        .modal__title{font-size:clamp(24px,4vw,40px);font-weight:900;color:var(--black);letter-spacing:-0.03em;margin-bottom:8px}
+        .modal__dates{font-size:12px;color:rgba(0,0,0,0.4);letter-spacing:0.1em;margin-bottom:8px}
+        .modal__category{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(0,0,0,0.4)}
+        .modal__body{padding:40px}
+        .modal__description{font-size:15px;line-height:1.7;color:rgba(0,0,0,0.8);margin-bottom:28px}
+        .modal__details{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:32px}
+        .modal__detail h4{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(0,0,0,0.4);margin-bottom:6px}
+        .modal__detail p{font-size:13px;color:var(--black);line-height:1.5}
+        .modal__close{position:absolute;top:16px;right:16px;width:40px;height:40px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--black);border-radius:4px}
+        .modal__close:hover{background:rgba(0,0,0,0.06)}
+        .modal__footer{padding:20px 40px;border-top:1px solid rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+        .modal__link{display:inline-block;border:1px solid var(--black);color:var(--black);font-size:10px;letter-spacing:0.25em;text-transform:uppercase;padding:11px 22px;text-decoration:none;transition:all 0.3s;background:transparent;cursor:pointer;font-family:inherit}
+        .modal__link:hover{background:var(--black);color:var(--white)}
+        .modal__images{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+        .modal__image{width:100%;height:160px;object-fit:cover;border-radius:6px}
+        .modal__topics{margin-bottom:20px}
+        .modal__topics h4{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(0,0,0,0.4);margin-bottom:8px}
+        .modal__topics p{font-size:13px;color:var(--black);line-height:1.6}
+      `}</style>
 
-          {/* Info card */}
-          <div style={{
-            position: "absolute", bottom: 60, left: "50%",
-            transform: "translateX(-50%)",
-            background: "rgba(240,236,228,0.94)", border: "1px solid #2a2a2a",
-            padding: "20px 36px", maxWidth: 440, textAlign: "center", borderRadius: 4,
-            transition: "opacity 0.4s",
-            zIndex: 10,
-          }}>
-            <p style={{
-              fontFamily: "'Special Elite', monospace", fontSize: 10,
-              color: "#888", letterSpacing: 3, marginBottom: 8, margin: "0 0 8px",
-            }}>{panel.detail}</p>
-            <p style={{
-              fontFamily: "'Caveat', cursive", fontSize: 22,
-              color: "#2a2a2a", margin: 0, lineHeight: 1.4,
-            }}>{panel.description}</p>
+      {/* NAVBAR */}
+      <nav className="nav">
+        <div className="nav__inner">
+          <span className="nav__logo">sarah abane</span>
+          <div className="nav__links">
+            <a href="#expertise">About</a>
+            <a href="#works">Works</a>
+            <a href="#contact">Contact</a>
           </div>
+          <button className="nav__cta">abane's blog</button>
+        </div>
+      </nav>
 
-          {/* Scroll progress dots */}
-          <div style={{
-            position: "absolute", right: 20, top: "50%",
-            transform: "translateY(-50%)",
-            display: "flex", flexDirection: "column", gap: 8, zIndex: 20,
-          }}>
-            {hallwayPanels.map((_, i) => (
-              <div key={i} style={{
-                width: 8, height: 8, borderRadius: "50%",
-                background: i === activePanel ? "#2a2a2a" : "transparent",
-                border: "1.5px solid #2a2a2a",
-                transition: "background 0.3s",
-              }} />
-            ))}
+      {/* HERO */}
+      <section className="hero" id="hero">
+        <div className="hero__sticky">
+          <div className="hero__scene" ref={heroSceneRef}>
+            <div className="hero__img" style={{top:'8vh', left:'32%', width:'34vw', height:'28vh'}}>
+              <img src={image2} alt="Profile 1" />
+            </div>
+            <div className="hero__img" style={{top:'12vh', left:'4%', width:'24vw', height:'48vh'}}>
+              <img src={image1} alt="Image 1" />
+            </div>
+            <div className="hero__img" style={{top:'24vh', left:'73%', width:'23vw', height:'64vh'}}>
+              <img src={profile1} alt="Profile 2" />
+            </div>
+            <div className="hero__img" style={{top:'62vh', left:'4%', width:'31vw', height:'30vh'}}>
+              <img src={week1} alt="Week 1" />
+            </div>
+            <div className="hero__img" style={{top:'62vh', left:'38%', width:'26vw', height:'30vh'}}>
+              <img src={week2} alt="Week 2" />
+            </div>
+            
+            <div className="hero__wordmark"><span>ojt-blog</span></div>
           </div>
-
-          {/* Scroll hint / back button */}
-          <div style={{
-            position: "absolute", bottom: 16, left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex", gap: 16, alignItems: "center", zIndex: 20,
-          }}>
-            <button onClick={onBack} style={{
-              background: "none", border: "1px dashed #2a2a2a",
-              padding: "5px 14px", fontFamily: "'Caveat', cursive",
-              fontSize: 14, color: "#2a2a2a", cursor: "pointer", borderRadius: 4,
-            }}>← Exit hallway</button>
-            <p style={{
-              fontFamily: "serif", fontSize: 11, color: "#999",
-              letterSpacing: 2, textTransform: "uppercase", margin: 0,
-            }}>
-              {activePanel < hallwayPanels.length - 1 ? "↓ Scroll to explore" : "✦ End of hallway"}
-            </p>
+          <div className="hero__after" ref={heroAfterRef}>
+            <h1 style={{ fontSize: "7rem" }}>The Bellevue Manila</h1>
+            <h1 className="dim" style={{ fontSize: "5.5rem" }}>Bellesoft Department</h1>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+
+      {/* CREATIVE */}
+      <section className="creative" id="creative" ref={creativeSectionRef}>
+        <div className="creative__line">
+          <h1><span className="creative__word">Full Stack Developer</span></h1>
+        </div>
+        <div className="creative__line">
+          <h1 className="dim"><span className="creative__word">Intern</span></h1>
+        </div>
+        <p>Seat & Table Reservation Management System · The Bellevue Manila</p>
+      </section>
+
+      {/* WORD REVEAL */}
+      <section className="words" id="words" ref={wordsSectionRef}>
+        <div className="words__sticky">
+          <p className="words__text" ref={wordTextRef}>
+            <span>Built</span> <span>a</span> <span>reservation</span> <span>system</span> <span>from</span> <span>research</span> <span>to</span> <span>full</span> <span>development,</span> <span>featuring</span> <span>interactive</span> <span>seat</span> <span>mapping,</span> <span>real-time</span> <span>updates,</span> <span>and</span> <span>a</span> <span>seamless</span> <span>user</span> <span>experience</span> <span>for</span> <span>both</span> <span>clients</span> <span>and</span> <span>admins.</span>
+          </p>
+        </div>
+      </section>
+
+      {/* STATS */}
+      <section className="stats" id="stats" ref={statsSectionRef}>
+        <div className="stats__grid">
+          <div className="stat">
+            <div className="stat__val">February<br/>23, 2026</div>
+            <div className="stat__label">Start Date</div>
+          </div>
+          <div className="stat">
+            <div className="stat__val">May<br/>04, 2026</div>
+            <div className="stat__label">End Date</div>
+          </div>
+        </div>
+      </section>
+
+      {/* EXPERTISE / WEEKS */}
+      <section className="expertise" id="expertise" ref={expertiseSectionRef}>
+        <p className="expertise__tag">OJT Journal</p>
+
+        <div className="expertise__header">
+          <h2 className="expertise__title">WEEKLY LOG</h2>
+          <button
+            className={`clock-toggle-btn ${showClock ? 'active' : ''}`}
+            onClick={() => setShowClock(v => !v)}
+          >
+            <span style={{fontSize:'16px'}}>{showClock ? '⏹' : '🕐'}</span>
+            {showClock ? 'HIDE CLOCK' : 'VIEW CLOCK DESIGN'}
+          </button>
+        </div>
+
+        {/* CLOCK PANEL */}
+        <div className={`clock-panel ${showClock ? 'open' : ''}`}>
+          <div className="clock-panel-inner">
+            <WeeklyClock />
+          </div>
+        </div>
+
+        {weeksData.map((week) => (
+          <div
+            className="service"
+            key={week.id}
+            onClick={() => openWeekModal(week)}
+          >
+            <div className="service__num">{week.id}</div>
+            <div className="service__body">
+              <div className="service__name">{week.name}</div>
+              <div className="service__dates">{week.dates}</div>
+              <div className="service__desc">{week.description}</div>
+              <button className="service__more" onClick={(e) => { e.stopPropagation(); openWeekModal(week); }}>
+                View details ↗
+              </button>
+            </div>
+            <div className="service__tag">{week.category}</div>
+          </div>
+        ))}
+      </section>
+
+      {/* MARQUEE */}
+      <section className="marquee" id="marquee">
+        <div className="marquee__track" ref={marqueeTrackRef}>
+          <span>RESEARCH</span><span>•</span>
+          <span>FRONTEND</span><span>•</span>
+          <span>BACKEND</span><span>•</span>
+          <span>REALTIME</span><span>•</span>
+          <span>FULLSTACK</span><span>•</span>
+          <span>INTERNSHIP</span><span>•</span>
+        </div>
+      </section>
+
+      
+
+      {/* CONTACT */}
+      <section className="contact" id="contact" ref={contactSectionRef}>
+        <div className="contact__inner" ref={contactInnerRef}>
+          <p className="contact__eyebrow">Let's work together</p>
+          <h2 className="contact__cta">VIEW MY PORTFOLIO</h2>
+          <a href="#" className="contact__btn">Portfolio</a>
+        </div>
+      </section>
+
+      {/* WORKS MODAL */}
+      {isModalOpen && selectedWork && (
+        <div className={`modal ${isModalOpen ? 'active' : ''}`} onClick={closeModal}>
+          <div className="modal__content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal__close" onClick={closeModal}>×</button>
+            <div className="modal__header">
+              <h2 className="modal__title">{selectedWork.name}</h2>
+              <p className="modal__category">{selectedWork.category}</p>
+            </div>
+            <div className="modal__body">
+              <p className="modal__description">{selectedWork.description}</p>
+              <div className="modal__details">
+                <div className="modal__detail">
+                  <h4>Client</h4>
+                  <p>{selectedWork.client}</p>
+                </div>
+                <div className="modal__detail">
+                  <h4>Duration</h4>
+                  <p>{selectedWork.duration}</p>
+                </div>
+                <div className="modal__detail">
+                  <h4>Technologies</h4>
+                  <p>{selectedWork.technologies}</p>
+                </div>
+                <div className="modal__detail">
+                  <h4>Role</h4>
+                  <p>{selectedWork.role}</p>
+                </div>
+              </div>
+            </div>
+            <div className="modal__footer">
+              <button className="modal__link" onClick={closeModal}>CLOSE</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* WEEK MODAL */}
+      {isWeekModalOpen && selectedWeek && (
+        <div className={`modal ${isWeekModalOpen ? 'active' : ''}`} onClick={closeWeekModal}>
+          <div className="modal__content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal__close" onClick={closeWeekModal}>×</button>
+            <div className="modal__header">
+              <h2 className="modal__title">{selectedWeek.name}</h2>
+              <p className="modal__dates">{selectedWeek.dates}</p>
+              <p className="modal__category">{selectedWeek.category}</p>
+            </div>
+            <div className="modal__body">
+              <p className="modal__description">{selectedWeek.description}</p>
+              <div className="modal__images">
+                {selectedWeek.images.map((image, index) => (
+                  <img key={index} src={image} alt={`${selectedWeek.name} - ${index + 1}`} className="modal__image" />
+                ))}
+              </div>
+              <div className="modal__topics">
+                <h4>Topics & Focus Areas</h4>
+                <p>{selectedWeek.topics}</p>
+              </div>
+              <div className="modal__details">
+                <div className="modal__detail">
+                  <h4>Duration</h4>
+                  <p>{selectedWeek.duration}</p>
+                </div>
+                <div className="modal__detail">
+                  <h4>Dates</h4>
+                  <p>{selectedWeek.dates}</p>
+                </div>
+                <div className="modal__detail" style={{gridColumn:'1 / -1'}}>
+                  <h4>Outcomes & Deliverables</h4>
+                  <p>{selectedWeek.outcomes}</p>
+                </div>
+              </div>
+            </div>
+            <div className="modal__footer">
+              <button className="modal__link" onClick={closeWeekModal}>CLOSE</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FOOTER */}
+      <footer className="footer">
+        <span className="footer__logo">abane</span>
+        <div className="footer__links">
+          <a href="#">Twitter</a>
+          <a href="#">GitHub</a>
+          <a href="#">LinkedIn</a>
+        </div>
+        <span className="footer__copy">© 2026 abane. All rights reserved.</span>
+      </footer>
+    </>
   );
 };
 
-// ── ROOT COMPONENT ────────────────────────────────────────────────────────────
-export default function OJTJourney() {
-  const [scene, setScene] = useState("loading");
-  const [loadProgress, setLoadProgress] = useState(0);
-
-  useEffect(() => {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Special+Elite&display=swap";
-    document.head.appendChild(link);
-
-    // Add peek animation
-    const style = document.createElement("style");
-    style.textContent = `
-      @keyframes peekIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-    `;
-    document.head.appendChild(style);
-
-    const interval = setInterval(() => {
-      setLoadProgress(p => {
-        if (p >= 100) { clearInterval(interval); return 100; }
-        return Math.min(100, p + Math.floor(Math.random() * 8) + 3);
-      });
-    }, 80);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (loadProgress >= 100 && scene === "loading") {
-      setTimeout(() => setScene("entrance"), 500);
-    }
-  }, [loadProgress, scene]);
-
-  const goHome = () => {
-    // Navigate to mainpage — works in Next.js / React Router / Vite
-    if (typeof window !== "undefined") {
-      if (window.history && window.history.pushState) {
-        window.history.pushState({}, "", "/");
-        window.dispatchEvent(new PopStateEvent("popstate"));
-      } else {
-        window.location.href = "/";
-      }
-    }
-  };
-
-  if (scene === "loading") return <LoadingScene progress={Math.min(loadProgress, 100)} />;
-  if (scene === "hallway") return <HallwayScene onBack={() => setScene("entrance")} />;
-
-  return (
-    <EntranceScene
-      onEnter={() => setScene("hallway")}
-      onGoHome={goHome}
-      profileImage={null} // ← Pass your image URL or base64 here, e.g. "/me.jpg"
-    />
-  );
-}
+export default DevianPortfolio;
