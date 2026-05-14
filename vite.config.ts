@@ -11,7 +11,15 @@ export default defineConfig({
     dedupe: ["react", "react-dom"],
   },
   root: path.resolve(__dirname),
-  assetsInclude: ['**/*.JPG', '**/*.JPEG', '**/*.PNG'],
+  assetsInclude: [
+    "**/*.JPG",
+    "**/*.JPEG",
+    "**/*.PNG",
+    "**/*.MP4",
+    "**/*.WEBM",
+    "**/*.MOV",
+    "**/*.M4V",
+  ],
   server: {
     port: 5173,
     host: "0.0.0.0",

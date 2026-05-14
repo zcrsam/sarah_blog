@@ -227,102 +227,393 @@ const WeeklyClock = ({ activeWeek, onWeekClick }) => {
   );
 };
 
-// ─── INLINE IMAGE CAROUSEL ────────────────────────────────────────────────────
+// ─── INLINE IMAGE / VIDEO CAROUSEL ───────────────────────────────────────────
+function normalizeCarouselSlide(item) {
+  if (item == null) return { url: "", isVideo: false };
+  if (typeof item === "string") return { url: item, isVideo: false };
+  return { url: item.url, isVideo: Boolean(item.isVideo) };
+}
+
 const InlineImageCarousel = ({ images }) => {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  const allImages = images || [];
-  const total = allImages.length;
+  const slides = (images || []).map(normalizeCarouselSlide);
+  const total = slides.length;
 
   if (total === 0) return null;
 
-  const prev = (e) => { e.stopPropagation(); setCurrentIdx(i => (i - 1 + total) % total); };
-  const next = (e) => { e.stopPropagation(); setCurrentIdx(i => (i + 1) % total); };
+  const current = slides[currentIdx];
+
+  const prev = (e) => {
+    e.stopPropagation();
+    setCurrentIdx((i) => (i - 1 + total) % total);
+  };
+  const next = (e) => {
+    e.stopPropagation();
+    setCurrentIdx((i) => (i + 1) % total);
+  };
+
+  const mediaBaseStyle = {
+    maxWidth: "90vw",
+    maxHeight: "90vh",
+    objectFit: "contain",
+    borderRadius: "4px",
+    boxShadow: "0 8px 60px rgba(0,0,0,0.6)",
+    cursor: "default",
+  };
 
   return (
     <>
-      {/* LIGHTBOX */}
       {lightboxOpen && (
         <div
           onClick={() => setLightboxOpen(false)}
           style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)',
-            zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'zoom-out',
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.92)",
+            zIndex: 9998,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "zoom-out",
           }}
         >
           <button
             onClick={() => setLightboxOpen(false)}
             style={{
-              position: 'absolute', top: '20px', right: '24px',
-              background: 'none', border: 'none', color: '#fff',
-              fontSize: '28px', cursor: 'pointer', lineHeight: 1, zIndex: 1,
+              position: "absolute",
+              top: "20px",
+              right: "24px",
+              background: "none",
+              border: "none",
+              color: "#fff",
+              fontSize: "28px",
+              cursor: "pointer",
+              lineHeight: 1,
+              zIndex: 1,
             }}
-          >✕</button>
+          >
+            ✕
+          </button>
           {total > 1 && (
-            <button onClick={(e) => { e.stopPropagation(); setCurrentIdx(i => (i - 1 + total) % total); }} style={{ position:'absolute', left:'20px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.2)', color:'#fff', fontSize:'28px', width:'48px', height:'48px', borderRadius:'50%', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>‹</button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentIdx((i) => (i - 1 + total) % total);
+              }}
+              style={{
+                position: "absolute",
+                left: "20px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                color: "#fff",
+                fontSize: "28px",
+                width: "48px",
+                height: "48px",
+                borderRadius: "50%",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              ‹
+            </button>
           )}
-          <img
-            src={allImages[currentIdx]}
-            alt={`Week image ${currentIdx + 1}`}
-            onClick={(e) => e.stopPropagation()}
+          {current.isVideo ? (
+            <video
+              key={current.url}
+              src={current.url}
+              controls
+              playsInline
+              autoPlay
+              onClick={(e) => e.stopPropagation()}
+              style={mediaBaseStyle}
+            />
+          ) : (
+            <img
+              src={current.url}
+              alt={`Week media ${currentIdx + 1}`}
+              onClick={(e) => e.stopPropagation()}
+              style={mediaBaseStyle}
+            />
+          )}
+          {total > 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentIdx((i) => (i + 1) % total);
+              }}
+              style={{
+                position: "absolute",
+                right: "20px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                color: "#fff",
+                fontSize: "28px",
+                width: "48px",
+                height: "48px",
+                borderRadius: "50%",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              ›
+            </button>
+          )}
+          <div
             style={{
-              maxWidth: '90vw', maxHeight: '90vh',
-              objectFit: 'contain', borderRadius: '4px',
-              boxShadow: '0 8px 60px rgba(0,0,0,0.6)',
-              cursor: 'default',
+              position: "absolute",
+              bottom: "20px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              color: "rgba(255,255,255,0.5)",
+              fontSize: "11px",
+              fontFamily: "'Georgia',serif",
+              letterSpacing: "0.1em",
             }}
-          />
-          {total > 1 && (
-            <button onClick={(e) => { e.stopPropagation(); setCurrentIdx(i => (i + 1) % total); }} style={{ position:'absolute', right:'20px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.2)', color:'#fff', fontSize:'28px', width:'48px', height:'48px', borderRadius:'50%', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>›</button>
-          )}
-          <div style={{ position:'absolute', bottom:'20px', left:'50%', transform:'translateX(-50%)', color:'rgba(255,255,255,0.5)', fontSize:'11px', fontFamily:"'Georgia',serif", letterSpacing:'0.1em' }}>{currentIdx + 1} / {total}</div>
+          >
+            {currentIdx + 1} / {total}
+          </div>
         </div>
       )}
 
-      <div style={{ width: '100%' }}>
+      <div style={{ width: "100%" }}>
         <div
           style={{
-            width: '100%', height: '200px', overflow: 'hidden', position: 'relative',
-            background: 'rgba(0,0,0,0.04)',
-            borderTop: '1px solid rgba(0,0,0,0.06)',
-            borderBottom: '1px solid rgba(0,0,0,0.06)',
-            cursor: 'zoom-in',
+            width: "100%",
+            height: "200px",
+            overflow: "hidden",
+            position: "relative",
+            background: "rgba(0,0,0,0.04)",
+            borderTop: "1px solid rgba(0,0,0,0.06)",
+            borderBottom: "1px solid rgba(0,0,0,0.06)",
+            cursor: current.isVideo ? "pointer" : "zoom-in",
           }}
           onClick={() => setLightboxOpen(true)}
         >
-          <img
-            src={allImages[currentIdx]}
-            alt={`Week image ${currentIdx + 1}`}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            onError={(e) => {
-              if (images && images[currentIdx % images.length]) {
-                e.target.src = images[currentIdx % images.length];
-              }
-            }}
-          />
+          {current.isVideo ? (
+            <video
+              key={current.url}
+              src={current.url}
+              muted
+              playsInline
+              loop
+              autoPlay
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+                pointerEvents: "none",
+              }}
+            />
+          ) : (
+            <img
+              src={current.url}
+              alt={`Week media ${currentIdx + 1}`}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              onError={(e) => {
+                const fb = slides.find((s) => !s.isVideo);
+                if (fb) e.target.src = fb.url;
+              }}
+            />
+          )}
           {total > 1 && (
             <>
-              <button onClick={prev} style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.9)', border:'none', borderRadius:'50%', width:'28px', height:'28px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'16px', boxShadow:'0 1px 6px rgba(0,0,0,0.2)', fontFamily:'Georgia,serif', color:'#1a1a1a', lineHeight:1 }}>‹</button>
-              <button onClick={next} style={{ position:'absolute', right:'12px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.9)', border:'none', borderRadius:'50%', width:'28px', height:'28px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'16px', boxShadow:'0 1px 6px rgba(0,0,0,0.2)', fontFamily:'Georgia,serif', color:'#1a1a1a', lineHeight:1 }}>›</button>
+              <button
+                onClick={prev}
+                style={{
+                  position: "absolute",
+                  left: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "rgba(255,255,255,0.9)",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "28px",
+                  height: "28px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "16px",
+                  boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
+                  fontFamily: "Georgia,serif",
+                  color: "#1a1a1a",
+                  lineHeight: 1,
+                }}
+              >
+                ‹
+              </button>
+              <button
+                onClick={next}
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "rgba(255,255,255,0.9)",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "28px",
+                  height: "28px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "16px",
+                  boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
+                  fontFamily: "Georgia,serif",
+                  color: "#1a1a1a",
+                  lineHeight: 1,
+                }}
+              >
+                ›
+              </button>
             </>
           )}
           {total > 1 && (
-            <div style={{ position:'absolute', bottom:'10px', left:'50%', transform:'translateX(-50%)', display:'flex', gap:'5px', alignItems:'center' }}>
-              {allImages.map((_, i) => (
-                <div key={i} onClick={(e) => { e.stopPropagation(); setCurrentIdx(i); }} style={{ width: i === currentIdx ? '16px' : '6px', height:'6px', borderRadius:'3px', background: i === currentIdx ? '#fff' : 'rgba(255,255,255,0.55)', transition:'all 0.25s', cursor:'pointer', boxShadow:'0 1px 3px rgba(0,0,0,0.3)' }} />
+            <div
+              style={{
+                position: "absolute",
+                bottom: "10px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                display: "flex",
+                gap: "5px",
+                alignItems: "center",
+              }}
+            >
+              {slides.map((_, i) => (
+                <div
+                  key={i}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentIdx(i);
+                  }}
+                  style={{
+                    width: i === currentIdx ? "16px" : "6px",
+                    height: "6px",
+                    borderRadius: "3px",
+                    background: i === currentIdx ? "#fff" : "rgba(255,255,255,0.55)",
+                    transition: "all 0.25s",
+                    cursor: "pointer",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                  }}
+                />
               ))}
             </div>
           )}
-          <div style={{ position:'absolute', top:'10px', right:'12px', background:'rgba(0,0,0,0.45)', color:'#fff', fontSize:'10px', fontFamily:"'Georgia', serif", padding:'3px 8px', borderRadius:'10px', letterSpacing:'0.08em' }}>{currentIdx + 1} / {total}</div>
-          <div style={{ position:'absolute', bottom:'10px', left:'12px', background:'rgba(0,0,0,0.35)', color:'rgba(255,255,255,0.7)', fontSize:'9px', fontFamily:"'Georgia', serif", padding:'2px 7px', borderRadius:'10px', letterSpacing:'0.1em' }}>tap to expand</div>
+          <div
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "12px",
+              background: "rgba(0,0,0,0.45)",
+              color: "#fff",
+              fontSize: "10px",
+              fontFamily: "'Georgia', serif",
+              padding: "3px 8px",
+              borderRadius: "10px",
+              letterSpacing: "0.08em",
+            }}
+          >
+            {currentIdx + 1} / {total}
+            {current.isVideo ? " · video" : ""}
+          </div>
+          <div
+            style={{
+              position: "absolute",
+              bottom: "10px",
+              left: "12px",
+              background: "rgba(0,0,0,0.35)",
+              color: "rgba(255,255,255,0.7)",
+              fontSize: "9px",
+              fontFamily: "'Georgia', serif",
+              padding: "2px 7px",
+              borderRadius: "10px",
+              letterSpacing: "0.1em",
+            }}
+          >
+            tap to expand
+          </div>
         </div>
         {total > 1 && (
-          <div style={{ display:'flex', gap:'2px', background:'rgba(0,0,0,0.03)', borderBottom:'1px solid rgba(0,0,0,0.06)' }}>
-            {allImages.map((src, i) => (
-              <div key={i} onClick={(e) => { e.stopPropagation(); setCurrentIdx(i); }} style={{ flex:1, height:'36px', overflow:'hidden', cursor:'pointer', opacity: i === currentIdx ? 1 : 0.45, outline: i === currentIdx ? '2px solid #1a1a1a' : '2px solid transparent', outlineOffset:'-2px', transition:'all 0.2s' }}>
-                <img src={src} alt={`thumb ${i+1}`} style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={(e) => { if (images && images[i % images.length]) { e.target.src = images[i % images.length]; } }} />
+          <div
+            style={{
+              display: "flex",
+              gap: "2px",
+              background: "rgba(0,0,0,0.03)",
+              borderBottom: "1px solid rgba(0,0,0,0.06)",
+            }}
+          >
+            {slides.map((slide, i) => (
+              <div
+                key={i}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentIdx(i);
+                }}
+                style={{
+                  flex: 1,
+                  height: "36px",
+                  overflow: "hidden",
+                  cursor: "pointer",
+                  opacity: i === currentIdx ? 1 : 0.45,
+                  outline: i === currentIdx ? "2px solid #1a1a1a" : "2px solid transparent",
+                  outlineOffset: "-2px",
+                  transition: "all 0.2s",
+                  position: "relative",
+                }}
+              >
+                {slide.isVideo ? (
+                  <video
+                    src={slide.url}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      pointerEvents: "none",
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={slide.url}
+                    alt={`thumb ${i + 1}`}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    onError={(e) => {
+                      const fb = slides.find((s) => !s.isVideo);
+                      if (fb) e.target.src = fb.url;
+                    }}
+                  />
+                )}
+                {slide.isVideo && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "14px",
+                      textShadow: "0 0 4px #000",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    ▶
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -976,7 +1267,10 @@ const DevianPortfolio = () => {
         const local = WEEK_GALLERY_BY_ID[w.id];
         return {
           ...w,
-          images: local && local.length > 0 ? local : w.images,
+          images:
+            local && local.length > 0
+              ? local
+              : w.images.map((url) => ({ url, isVideo: false })),
         };
       }),
     []
