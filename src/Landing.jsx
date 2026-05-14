@@ -4,8 +4,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import heroSec from "./assets/template/heroSec.png";
 import heroSecLeft from "./assets/template/heroSecLeft.png";
 import heroSecRight from "./assets/template/heroSecRight.png";
-import decorLeft from "./assets/template/2left.png";
-import decorRight from "./assets/template/2right.png";
+import decorLeft from "./assets/template/2Left.png";
+import decorRight from "./assets/template/2Right.png";
 
 gsap.registerPlugin(ScrollTrigger);
 
