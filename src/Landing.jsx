@@ -230,60 +230,7 @@ const WeeklyClock = ({ activeWeek, onWeekClick }) => {
 const InlineImageCarousel = ({ images, weekId }) => {
   const [currentIdx, setCurrentIdx] = useState(0);
 
-  const weekImages = {
-    '01': [
-      new URL(`./assets/weeks/week1/1.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week1/2.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week1/3.png`, import.meta.url).href,
-      new URL(`./assets/weeks/week1/4.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week1/5.png`, import.meta.url).href,
-      new URL(`./assets/weeks/week1/6.png`, import.meta.url).href,
-      new URL(`./assets/weeks/week1/7.PNG`, import.meta.url).href,
-      new URL(`./assets/weeks/week1/8.png`, import.meta.url).href,
-    ],
-    '02': [
-      new URL(`./assets/weeks/week2/1.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week2/2.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week2/3.png`, import.meta.url).href,
-      new URL(`./assets/weeks/week2/4.jpg`, import.meta.url).href,
-    ],
-    '03': [
-      new URL(`./assets/weeks/week3/1.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week3/2.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week3/3.png`, import.meta.url).href,
-    ],
-    '04': [
-      new URL(`./assets/weeks/week4/1.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week4/2.jpg`, import.meta.url).href,
-    ],
-    '05': [
-      new URL(`./assets/weeks/week5/1.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week5/2.jpg`, import.meta.url).href,
-    ],
-    '06': [
-      new URL(`./assets/weeks/week6/1.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week6/2.jpg`, import.meta.url).href,
-    ],
-    '07': [
-      new URL(`./assets/weeks/week7/1.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week7/2.jpg`, import.meta.url).href,
-    ],
-    '08': [
-      new URL(`./assets/weeks/week8/1.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week8/2.jpg`, import.meta.url).href,
-    ],
-    '09': [
-      new URL(`./assets/weeks/week9/1.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week9/2.jpg`, import.meta.url).href,
-    ],
-    '10': [
-      new URL(`./assets/weeks/week10/1.jpg`, import.meta.url).href,
-      new URL(`./assets/weeks/week10/2.jpg`, import.meta.url).href,
-    ],
-  };
-
-  const localImgs = weekImages[weekId] || [];
-  const allImages = localImgs.length > 0 ? localImgs : (images || []);
+  const allImages = images || [];
   const total = allImages.length;
 
   if (total === 0) return null;
