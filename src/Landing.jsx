@@ -1,11 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import heroSec from "./assets/template/heroSec.png";
+import heroImage from "./assets/template/heroSec.png";
 import heroSecLeft from "./assets/template/heroSecLeft.png";
 import heroSecRight from "./assets/template/heroSecRight.png";
 import decorLeft from "./assets/template/2Left.png";
 import decorRight from "./assets/template/2Right.png";
+import { WEEK_GALLERY_BY_ID } from "./weekGalleryImages";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -226,9 +227,10 @@ const WeeklyClock = ({ activeWeek, onWeekClick }) => {
   );
 };
 
-// ─── INLINE IMAGE CAROUSEL (shown directly in the feed post) ─────────────────
-const InlineImageCarousel = ({ images, weekId }) => {
+// ─── INLINE IMAGE CAROUSEL ────────────────────────────────────────────────────
+const InlineImageCarousel = ({ images }) => {
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const allImages = images || [];
   const total = allImages.length;
@@ -239,126 +241,294 @@ const InlineImageCarousel = ({ images, weekId }) => {
   const next = (e) => { e.stopPropagation(); setCurrentIdx(i => (i + 1) % total); };
 
   return (
-    <div style={{ width:'100%' }}>
-      {/* Main image — square Instagram ratio */}
-      <div style={{
-        width:'100%', aspectRatio:'1/1',
-        overflow:'hidden', position:'relative',
-        background:'rgba(0,0,0,0.04)',
-        borderTop:'1px solid rgba(0,0,0,0.06)',
-        borderBottom:'1px solid rgba(0,0,0,0.06)',
-      }}>
-        <img
-          src={allImages[currentIdx]}
-          alt={`Week image ${currentIdx + 1}`}
-          style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}
-          onError={(e) => {
-            if (images && images[currentIdx % images.length]) {
-              e.target.src = images[currentIdx % images.length];
-            }
+    <>
+      {/* LIGHTBOX */}
+      {lightboxOpen && (
+        <div
+          onClick={() => setLightboxOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)',
+            zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'zoom-out',
           }}
-        />
+        >
+          <button
+            onClick={() => setLightboxOpen(false)}
+            style={{
+              position: 'absolute', top: '20px', right: '24px',
+              background: 'none', border: 'none', color: '#fff',
+              fontSize: '28px', cursor: 'pointer', lineHeight: 1, zIndex: 1,
+            }}
+          >✕</button>
+          {total > 1 && (
+            <button onClick={(e) => { e.stopPropagation(); setCurrentIdx(i => (i - 1 + total) % total); }} style={{ position:'absolute', left:'20px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.2)', color:'#fff', fontSize:'28px', width:'48px', height:'48px', borderRadius:'50%', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>‹</button>
+          )}
+          <img
+            src={allImages[currentIdx]}
+            alt={`Week image ${currentIdx + 1}`}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '90vw', maxHeight: '90vh',
+              objectFit: 'contain', borderRadius: '4px',
+              boxShadow: '0 8px 60px rgba(0,0,0,0.6)',
+              cursor: 'default',
+            }}
+          />
+          {total > 1 && (
+            <button onClick={(e) => { e.stopPropagation(); setCurrentIdx(i => (i + 1) % total); }} style={{ position:'absolute', right:'20px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.2)', color:'#fff', fontSize:'28px', width:'48px', height:'48px', borderRadius:'50%', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>›</button>
+          )}
+          <div style={{ position:'absolute', bottom:'20px', left:'50%', transform:'translateX(-50%)', color:'rgba(255,255,255,0.5)', fontSize:'11px', fontFamily:"'Georgia',serif", letterSpacing:'0.1em' }}>{currentIdx + 1} / {total}</div>
+        </div>
+      )}
 
-        {/* Prev / Next buttons */}
+      <div style={{ width: '100%' }}>
+        <div
+          style={{
+            width: '100%', height: '200px', overflow: 'hidden', position: 'relative',
+            background: 'rgba(0,0,0,0.04)',
+            borderTop: '1px solid rgba(0,0,0,0.06)',
+            borderBottom: '1px solid rgba(0,0,0,0.06)',
+            cursor: 'zoom-in',
+          }}
+          onClick={() => setLightboxOpen(true)}
+        >
+          <img
+            src={allImages[currentIdx]}
+            alt={`Week image ${currentIdx + 1}`}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            onError={(e) => {
+              if (images && images[currentIdx % images.length]) {
+                e.target.src = images[currentIdx % images.length];
+              }
+            }}
+          />
+          {total > 1 && (
+            <>
+              <button onClick={prev} style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.9)', border:'none', borderRadius:'50%', width:'28px', height:'28px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'16px', boxShadow:'0 1px 6px rgba(0,0,0,0.2)', fontFamily:'Georgia,serif', color:'#1a1a1a', lineHeight:1 }}>‹</button>
+              <button onClick={next} style={{ position:'absolute', right:'12px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.9)', border:'none', borderRadius:'50%', width:'28px', height:'28px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'16px', boxShadow:'0 1px 6px rgba(0,0,0,0.2)', fontFamily:'Georgia,serif', color:'#1a1a1a', lineHeight:1 }}>›</button>
+            </>
+          )}
+          {total > 1 && (
+            <div style={{ position:'absolute', bottom:'10px', left:'50%', transform:'translateX(-50%)', display:'flex', gap:'5px', alignItems:'center' }}>
+              {allImages.map((_, i) => (
+                <div key={i} onClick={(e) => { e.stopPropagation(); setCurrentIdx(i); }} style={{ width: i === currentIdx ? '16px' : '6px', height:'6px', borderRadius:'3px', background: i === currentIdx ? '#fff' : 'rgba(255,255,255,0.55)', transition:'all 0.25s', cursor:'pointer', boxShadow:'0 1px 3px rgba(0,0,0,0.3)' }} />
+              ))}
+            </div>
+          )}
+          <div style={{ position:'absolute', top:'10px', right:'12px', background:'rgba(0,0,0,0.45)', color:'#fff', fontSize:'10px', fontFamily:"'Georgia', serif", padding:'3px 8px', borderRadius:'10px', letterSpacing:'0.08em' }}>{currentIdx + 1} / {total}</div>
+          <div style={{ position:'absolute', bottom:'10px', left:'12px', background:'rgba(0,0,0,0.35)', color:'rgba(255,255,255,0.7)', fontSize:'9px', fontFamily:"'Georgia', serif", padding:'2px 7px', borderRadius:'10px', letterSpacing:'0.1em' }}>tap to expand</div>
+        </div>
         {total > 1 && (
-          <>
-            <button
-              onClick={prev}
-              style={{
-                position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)',
-                background:'rgba(255,255,255,0.9)', border:'none', borderRadius:'50%',
-                width:'28px', height:'28px', cursor:'pointer', display:'flex',
-                alignItems:'center', justifyContent:'center', fontSize:'16px',
-                boxShadow:'0 1px 6px rgba(0,0,0,0.2)', fontFamily:'Georgia,serif',
-                color:'#1a1a1a', lineHeight:1,
-              }}
-            >‹</button>
-            <button
-              onClick={next}
-              style={{
-                position:'absolute', right:'12px', top:'50%', transform:'translateY(-50%)',
-                background:'rgba(255,255,255,0.9)', border:'none', borderRadius:'50%',
-                width:'28px', height:'28px', cursor:'pointer', display:'flex',
-                alignItems:'center', justifyContent:'center', fontSize:'16px',
-                boxShadow:'0 1px 6px rgba(0,0,0,0.2)', fontFamily:'Georgia,serif',
-                color:'#1a1a1a', lineHeight:1,
-              }}
-            >›</button>
-          </>
-        )}
-
-        {/* Dot indicators */}
-        {total > 1 && (
-          <div style={{
-            position:'absolute', bottom:'10px', left:'50%', transform:'translateX(-50%)',
-            display:'flex', gap:'5px', alignItems:'center',
-          }}>
-            {allImages.map((_, i) => (
-              <div
-                key={i}
-                onClick={(e) => { e.stopPropagation(); setCurrentIdx(i); }}
-                style={{
-                  width: i === currentIdx ? '16px' : '6px',
-                  height:'6px', borderRadius:'3px',
-                  background: i === currentIdx ? '#fff' : 'rgba(255,255,255,0.55)',
-                  transition:'all 0.25s', cursor:'pointer',
-                  boxShadow:'0 1px 3px rgba(0,0,0,0.3)',
-                }}
-              />
+          <div style={{ display:'flex', gap:'2px', background:'rgba(0,0,0,0.03)', borderBottom:'1px solid rgba(0,0,0,0.06)' }}>
+            {allImages.map((src, i) => (
+              <div key={i} onClick={(e) => { e.stopPropagation(); setCurrentIdx(i); }} style={{ flex:1, height:'36px', overflow:'hidden', cursor:'pointer', opacity: i === currentIdx ? 1 : 0.45, outline: i === currentIdx ? '2px solid #1a1a1a' : '2px solid transparent', outlineOffset:'-2px', transition:'all 0.2s' }}>
+                <img src={src} alt={`thumb ${i+1}`} style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={(e) => { if (images && images[i % images.length]) { e.target.src = images[i % images.length]; } }} />
+              </div>
             ))}
           </div>
         )}
-
-        {/* Counter badge */}
-        <div style={{
-          position:'absolute', top:'10px', right:'12px',
-          background:'rgba(0,0,0,0.45)', color:'#fff',
-          fontSize:'10px', fontFamily:"'Georgia', serif",
-          padding:'3px 8px', borderRadius:'10px', letterSpacing:'0.08em',
-        }}>{currentIdx + 1} / {total}</div>
       </div>
+    </>
+  );
+};
 
-      {/* Thumbnail strip */}
-      {total > 1 && (
-        <div style={{
-          display:'flex', gap:'2px', background:'rgba(0,0,0,0.03)',
-          borderBottom:'1px solid rgba(0,0,0,0.06)',
-        }}>
-          {allImages.map((src, i) => (
-            <div
-              key={i}
-              onClick={(e) => { e.stopPropagation(); setCurrentIdx(i); }}
-              style={{
-                flex:1, height:'48px', overflow:'hidden', cursor:'pointer',
-                opacity: i === currentIdx ? 1 : 0.45,
-                outline: i === currentIdx ? '2px solid #1a1a1a' : '2px solid transparent',
-                outlineOffset:'-2px', transition:'all 0.2s',
-              }}
-            >
-              <img
-                src={src}
-                alt={`thumb ${i+1}`}
-                style={{ width:'100%', height:'100%', objectFit:'cover' }}
-                onError={(e) => {
-                  if (images && images[i % images.length]) {
-                    e.target.src = images[i % images.length];
-                  }
-                }}
-              />
-            </div>
-          ))}
+// ─── CLOCK PANEL ─────────────────────────────────────────────────────────────
+const ClockPanel = () => {
+  const [activeWeek, setActiveWeek] = useState(null);
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div>
+      {/* Toggle button */}
+      <button
+        onClick={() => setVisible(v => !v)}
+        style={{
+          display:'block', margin:'0 auto 16px',
+          border:'1px solid rgba(0,0,0,0.2)', background: visible ? 'rgba(0,0,0,0.07)' : 'transparent',
+          color:'rgba(0,0,0,0.55)', fontSize:'10px', letterSpacing:'0.2em',
+          fontFamily:'Georgia, serif', padding:'7px 20px', borderRadius:'4px',
+          cursor:'pointer', textTransform:'uppercase', transition:'all 0.25s',
+        }}
+      >
+        {visible ? '— Hide Clock —' : '+ Show OJT Clock'}
+      </button>
+      {/* Animated reveal */}
+      <div style={{
+        overflow:'hidden',
+        maxHeight: visible ? '700px' : '0px',
+        opacity: visible ? 1 : 0,
+        transition:'max-height 0.5s ease, opacity 0.4s ease',
+      }}>
+        <WeeklyClock activeWeek={activeWeek} onWeekClick={setActiveWeek} />
+      </div>
+    </div>
+  );
+};
+
+// ─── DAILY REPORT DATA ────────────────────────────────────────────────────────
+const dailyReports = [
+  { week: 'W1', date: 'Feb 24, 2026 (Tuesday)',    text: 'R&D — Researched existing applications and websites related to seat and table management systems.' },
+  { week: 'W1', date: 'Feb 25, 2026 (Wednesday)',  text: 'Created a comparison table among existing systems and identified key functionalities.' },
+  { week: 'W1', date: 'Feb 26, 2026 (Thursday)',   text: 'Started the flowchart design (both for client and admin side).' },
+  { week: 'W1', date: 'Feb 27, 2026 (Friday)',     text: 'Finished the flowchart design and created the initial UI/UX layout.' },
+  { week: 'W2', date: 'Mar 2, 2026 (Monday)',      text: 'Started project development; building the client-side landing page.' },
+  { week: 'W2', date: 'Mar 3, 2026 (Tuesday)',     text: 'Polished the landing page on the client side. Coded the All Venues page. Started coding one of the seat and table layouts.' },
+  { week: 'W2', date: 'Mar 4, 2026 (Wednesday)',   text: 'Focused on front-end development. Developed the admin side including: Admin login page, Admin dashboard, Seat map layout.' },
+  { week: 'W2', date: 'Mar 5, 2026 (Thursday)',    text: 'Fixed color and font consistency. Adjusted text elements that were not clearly visible. Tested the function for adding tables and seats. Fixed buttons that were not working properly.' },
+  { week: 'W2', date: 'Mar 6, 2026 (Friday)',      text: 'Fixed adding and deleting seats and tables (layout editing). Synced seat layout changes between admin and client side, including seat reservations.' },
+  { week: 'W3', date: 'Mar 9, 2026 (Monday)',      text: 'Tried implementing authentication. Connected the login functionality. Installed Postman and tested the authentication process.' },
+  { week: 'W3', date: 'Mar 10, 2026',              text: 'Displayed the reservation data from the database on the admin dashboard panels and tables.' },
+  { week: 'W3', date: 'Mar 11, 2026',              text: 'Fixed UI for Landing Page, All Venues Page, and Reservation Page. Fixed role based permissions for Admin and Super Admin.' },
+  { week: 'W3', date: 'Mar 13, 2026',              text: 'Completed Main Wing and Tower Wing rooms in the seatmap and enabled reservation linking between client and admin. Added notification icon in the navbar for reservation alerts and system activity updates.' },
+  { week: 'W4', date: 'Mar 16, 2026 (Monday)',     text: 'Fixed errors in the connection between the Reservation Page and Admin Side and corrected the color legends for Pending, Available, and Reserved seats. Designed the notification feature layout in Figma. Modified the client-side flowchart to improve UX clarity.' },
+  { week: 'W4', date: 'Mar 17, 2026 (Tuesday)',    text: 'Developed and database-connected Notification Dashboard for reservation/notification monitoring.' },
+  { week: 'W4', date: 'Mar 18, 2026 (Wednesday)',  text: 'Integrated WebSocket for real-time updates and added live reservation alerts with status indicators.' },
+  { week: 'W4', date: 'Mar 19, 2026 (Thursday)',   text: 'Added pagination with Previous/Next buttons and page selection. Fixed time display to accurate 12-hour format. Improved dashboard responsiveness with better scrolling and layout adjustments.' },
+  { week: 'W4', date: 'Mar 20, 2026 (Friday)',     text: 'Fixed Alert pop-ups, update in real time (no page refresh/reload needed). Fixed issue where venue displays "—" initially but shows correctly after refresh.' },
+  { week: 'W5', date: 'Mar 25, 2026 (Wednesday)',  text: 'Added edit function and delete function to remove individual notifications. Integrated pagination for notifications.' },
+  { week: 'W5', date: 'Mar 26, 2026 (Thursday)',   text: 'Implemented auto-delete in Admin Dashboard when seats/tables are removed.' },
+  { week: 'W5', date: 'Mar 27, 2026 (Friday)',     text: 'Code split in some files.' },
+  { week: 'W5', date: 'Mar 30, 2026 (Monday)',     text: 'Added Manage Booking feature (cancel, edit, reschedule, rebook).' },
+  { week: 'W5', date: 'Mar 31, 2026 (Tuesday)',    text: 'Implemented sorting in Admin Dashboard to display the most recent reservations at the top. Simplified input fields in AlabangReserve by removing dropdown, increment, and decrement controls. Improved mobile responsiveness in Alabang Reservation.' },
+  { week: 'W6', date: 'Apr 1, 2026 (Wednesday)',   text: 'Front end only: Implemented Manage Booking page with search (name + last digit of phone number), edit/view features, and conditional cancellation (pending only). Modified the SeatMap to become dynamic (added feature that supports seats without tables + venue creation). Modified the notification dashboard (added the pending reservations).' },
+  { week: 'W6', date: 'Apr 6, 2026 (Monday)',      text: 'Connected Manage Booking into the database. Email System: Implemented Gmail SMTP integration with custom templates for all reservation statuses.' },
+  { week: 'W6', date: 'Apr 7, 2026 (Tuesday)',     text: 'Fixed default screen in notification page (Pending reservations). Used reference code instead of combination code; added forgot reference code feature for reservation statuses.' },
+  { week: 'W6', date: 'Apr 8, 2026 (Wednesday)',   text: 'Implemented edit and cancel booking features with database integration. Updated Admin Dashboard logic: once a reservation is rejected, it can no longer be approved.' },
+  { week: 'W6', date: 'Apr 9, 2026 (Thursday)',    text: 'Fixed UI in Manage Booking, Forgot Code, and Homepage.' },
+  { week: 'W7', date: 'Apr 13, 2026 (Monday)',     text: 'Fixed cancel booking error (invalid status) and added venue details on search. Improved AlabangReserve: seat limits, button validation, and mobile layout. Updated VenuePage: correct details, fixed subrooms.' },
+  { week: 'W7', date: 'Apr 14, 2026 (Tuesday)',    text: 'Improved Notifications (mobile UI, readable pagination, cleaned header). Added "Select All" for bulk delete in Admin dashboard.' },
+  { week: 'W7', date: 'Apr 15, 2026 (Wednesday)',  text: 'Fixed reservation logic for seat vs table selection. Updated UI behavior for table/seat interaction. Fixed Notifications navbar responsiveness (mobile). Ensured delete action removes data from database.' },
+  { week: 'W7', date: 'Apr 16, 2026 (Thursday)',   text: 'Modified UI designs or format for email messages. Added notification alert feature when user or guest cancel a booking.' },
+  { week: 'W7', date: 'Apr 17, 2026 (Friday)',     text: 'Fixed homepage UI: toggle alignment, chevrons, card text cleanup, spacing, carousel, animations, and light/dark mode styles.' },
+  { week: 'W7', date: 'Apr 18, 2026 (Saturday)',   text: 'Added features: email subscription flow, hover-only schedule text, and dynamic color updates across components.' },
+  { week: 'W8', date: 'Apr 20, 2026 (Monday)',     text: 'Added rooms to the Main Wing for proper reservation dashboard data loading. (20/20 Function Rooms - 3 sub rooms; Laguna Ballroom - 2 sub rooms).' },
+  { week: 'W8', date: 'Apr 21, 2026 (Tuesday)',    text: 'Completed the rooms to the Tower wing and Dining for proper reservation dashboard data loading.' },
+  { week: 'W8', date: 'Apr 22, 2026 (Wednesday)',  text: 'Fixed standalone seat bugs and synced reservations with admin dashboard (color state + modal table data handling in Alabang Function Room).' },
+  { week: 'W8', date: 'Apr 23, 2026 (Thursday)',   text: 'Fixed standalone seat reservations to correctly update status color (pending/reserved) and persist in database in all rooms in Main Wing. Fixed approval flow so approved reservations reflect red (reserved) status on client side.' },
+  { week: 'W8', date: 'Apr 24, 2026 (Friday)',     text: 'Fixed standalone seat reservations to correctly update status color (pending/reserved) and persist in database in all rooms in Tower Wing.' },
+  { week: 'W9', date: 'Apr 27, 2026 (Monday)',     text: 'Fixed UI issues across Main Wing rooms: resolved invisible (white) pop-up modals in 20/20 Function Rooms A, B, and C, and standardized modal design to match Laguna Reserve 1. Also updated selection UI by removing "type standalone seat" text when reserving standalone seats in multiple rooms (20/20 B, Laguna Ballroom 2, Business Center).' },
+  { week: 'W9', date: 'Apr 28, 2026 (Tuesday)',    text: 'Fixed the UI pop-up modal and seat synchronization issue between admin seatmap editor and all rooms in Tower Wing.' },
+  { week: 'W9', date: 'Apr 29, 2026 (Wednesday)',  text: 'Documented venue data (frontend & backend, incl. seeders & API). Built ReservationPass (Inter font) and cleaned Notifications UI.' },
+  { week: 'W10', date: 'May 1–4, 2026',            text: 'During the final week of internship activities, I focused on preparing the Seat and Table Reservation Management System for presentation and turnover. I reviewed the overall system workflow, features, and functionalities to ensure that all modules were functioning properly before the presentation to the Chief Information Officer, Sir Mark Jerome Castillo. This included reviewing the client side, admin dashboard, notification system, reservation synchronization, and booking management features. I finalized the presentation materials, system demonstration, and documentation for project evaluation and turnover. I also documented revisions, pending improvements, and recommendations for the next OJT trainee to continue the development of the system, while ensuring the application was stable and ready for endorsement.' },
+];
+
+// ─── DAILY REPORT SECTION ─────────────────────────────────────────────────────
+const DailyReportSection = ({ inline, activeWeekFromFeed }) => {
+  const [openWeek, setOpenWeek] = useState(null);
+  const weekGroups = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10'];
+  const weekTitles = {
+    W1: 'Week 1 — Research & Flowchart · Feb 24–27',
+    W2: 'Week 2 — Frontend Development · Mar 2–6',
+    W3: 'Week 3 — Auth & Backend · Mar 9–13',
+    W4: 'Week 4 — Real-time & UI · Mar 16–20',
+    W5: 'Week 5 — Notif & Optimization · Mar 25–31',
+    W6: 'Week 6 — Email & Booking · Apr 1–9',
+    W7: 'Week 7 — Debugging & UX · Apr 13–18',
+    W8: 'Week 8 — Room Config & Sync · Apr 20–24',
+    W9: 'Week 9 — UI Refinements & Docs · Apr 27–29',
+      W10: 'Week 10 — Presentation & Turnover · May 1–4', // 
+  };
+
+  // Sync open week with feed's active week
+  useEffect(() => {
+    if (activeWeekFromFeed !== null && activeWeekFromFeed !== undefined) {
+      const wk = weekGroups[activeWeekFromFeed];
+      if (wk) setOpenWeek(wk);
+    }
+  }, [activeWeekFromFeed]);
+
+  return (
+    <div style={{ background:'#faf9f6', padding: inline ? '40px 32px 48px' : '64px 24px 48px' }}>
+      <div style={{ maxWidth: inline ? '100%' : '600px', margin:'0 auto' }}>
+        <p style={{ fontSize:'9px', letterSpacing:'0.4em', textTransform:'uppercase', color:'rgba(0,0,0,0.28)', fontFamily:"'Georgia',serif", marginBottom:'6px', textAlign:'center' }}>
+          Sarah C. Abane
+        </p>
+        <h2 style={{ fontSize:'clamp(20px,3vw,30px)', fontWeight:'900', color:'#1a1a1a', fontFamily:"'Georgia',serif", fontStyle:'italic', textAlign:'center', marginBottom:'8px', letterSpacing:'-0.02em' }}>
+          End of Day Reports
+        </h2>
+        <p style={{ fontSize:'11px', color:'rgba(0,0,0,0.35)', fontFamily:"'Georgia',serif", textAlign:'center', marginBottom:'36px', fontStyle:'italic' }}>
+          February 24 – April 29, 2026 · The Bellevue Manila · Bellesoft Systems Inc.
+        </p>
+
+        <div style={{ display:'flex', flexDirection:'column', gap:'2px' }}>
+          {weekGroups.map((wk) => {
+            const entries = dailyReports.filter(r => r.week === wk);
+            const isOpen = openWeek === wk;
+            const isHighlighted = activeWeekFromFeed !== null && weekGroups[activeWeekFromFeed] === wk;
+            return (
+              <div key={wk} style={{
+                border: isHighlighted ? '1px solid rgba(0,0,0,0.3)' : '1px solid rgba(0,0,0,0.08)',
+                borderRadius:'3px', overflow:'hidden',
+                background: isHighlighted ? 'rgba(0,0,0,0.03)' : 'transparent',
+                transition:'all 0.3s',
+              }}>
+                <button
+                  onClick={() => setOpenWeek(isOpen ? null : wk)}
+                  style={{
+                    width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between',
+                    padding:'12px 16px', background: isOpen ? 'rgba(0,0,0,0.04)' : 'transparent',
+                    border:'none', cursor:'pointer', fontFamily:"'Georgia',serif", textAlign:'left',
+                    transition:'background 0.2s',
+                  }}
+                >
+                  <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
+                    <span style={{
+                      fontSize:'10px', fontWeight:'900',
+                      fontFamily:"'Georgia',serif", minWidth:'28px',
+                      background: isHighlighted ? '#1a1a1a' : 'transparent',
+                      color: isHighlighted ? '#faf9f6' : '#1a1a1a',
+                      padding: isHighlighted ? '2px 5px' : '0',
+                      borderRadius:'2px',
+                      transition:'all 0.3s',
+                    }}>{wk}</span>
+                    <span style={{ fontSize:'11px', color:'rgba(0,0,0,0.65)', fontFamily:"'Georgia',serif" }}>{weekTitles[wk]}</span>
+                  </div>
+                  <span style={{ fontSize:'14px', color:'rgba(0,0,0,0.3)', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition:'transform 0.2s', display:'block', lineHeight:1 }}>▾</span>
+                </button>
+
+                {isOpen && (
+                  <div style={{ borderTop:'1px solid rgba(0,0,0,0.06)', background:'rgba(0,0,0,0.01)' }}>
+                    {entries.map((entry, i) => (
+                      <div key={i} style={{ display:'flex', gap:'16px', padding:'12px 16px', borderBottom: i < entries.length-1 ? '1px solid rgba(0,0,0,0.04)' : 'none' }}>
+                        <div style={{ flexShrink:0, paddingTop:'2px' }}>
+                          <div style={{ width:'5px', height:'5px', borderRadius:'50%', background:'rgba(0,0,0,0.2)', marginTop:'5px' }} />
+                        </div>
+                        <div>
+                          <p style={{ fontSize:'10px', fontWeight:'700', color:'rgba(0,0,0,0.35)', fontFamily:"'Georgia',serif", marginBottom:'4px', letterSpacing:'0.05em' }}>{entry.date}</p>
+                          <p style={{ fontSize:'12px', color:'rgba(0,0,0,0.7)', fontFamily:"'Georgia',serif", lineHeight:1.6 }}>{entry.text}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
-      )}
+
+        {/* ── WEEKLY CLOCK at bottom of right panel ── */}
+        <div style={{ marginTop:'40px', borderTop:'1px solid rgba(0,0,0,0.08)', paddingTop:'32px' }}>
+          <p style={{ fontSize:'9px', letterSpacing:'0.35em', textTransform:'uppercase', color:'rgba(0,0,0,0.28)', fontFamily:"'Georgia',serif", marginBottom:'16px', textAlign:'center' }}>
+            — OJT Clock · Weekly Overview —
+          </p>
+          <ClockPanel />
+        </div>
+
+      </div>
     </div>
   );
 };
 
 // ─── INSTAGRAM FEED ───────────────────────────────────────────────────────────
-const IGFeed = ({ weeksData }) => {
+const IGFeed = ({ weeksData, onActiveWeekChange }) => {
   const [likedPosts, setLikedPosts] = useState(new Set());
   const [savedPosts, setSavedPosts] = useState(new Set());
-  const [showClock, setShowClock] = useState(false);
-  const [activeWeek, setActiveWeek] = useState(0);
+  const [activeWeek, setActiveWeek] = useState(null);
+
+  const handleSetActiveWeek = (idx) => {
+    setActiveWeek(idx);
+    if (onActiveWeekChange) onActiveWeekChange(idx);
+  };
 
   const bgPatterns = [
     'repeating-linear-gradient(45deg,#f5f2ed,#f5f2ed 2px,#faf9f6 2px,#faf9f6 12px)',
@@ -400,30 +570,32 @@ const IGFeed = ({ weeksData }) => {
     "#Documentation #UIDesign #ReservationPass #API #FinalStretch",
     "#OJTComplete #Presentation #Turnover #Grateful #ThebellevueManila #FullStack",
   ];
+  
   const comment1 = [
-    {user:"sir_castillo", text:"Great initiative on the flowcharts! 💪"},
-    {user:"bellesoft_cio", text:"Clean UI — loving the seat editor!"},
-    {user:"bellesoft_cio", text:"JWT or sessions? 👀"},
-    {user:"sir_castillo", text:"Real-time is a game changer for the hotel 🔥"},
-    {user:"ojt_diary_ph", text:"Code splitting is so satisfying 💜"},
-    {user:"bellesoft_cio", text:"This is EXACTLY what we needed 👏"},
-    {user:"batchmate_cs", text:"The dark mode toggle is so clean!"},
-    {user:"sir_castillo", text:"Laguna Ballroom config looks great 🔴"},
-    {user:"bellesoft_cio", text:"The ReservationPass design is beautiful!"},
-    {user:"sir_castillo", text:"Outstanding work Devian! Proud of you 🎊"},
-  ];
-  const comment2 = [
-    {user:"devian_codes", text:"The wireframes took forever but worth it 😅"},
-    {user:"ojt_diary_ph", text:"React dev arc going brrr 💙"},
-    {user:"devian_codes", text:"JWT all the way haha 🔑"},
-    {user:"batchmate_cs", text:"WebSocket arc unlocked 🎮"},
-    {user:"devian_codes", text:"The bundle was a monster before this 😭"},
-    {user:"sir_castillo", text:"The email templates look so professional!"},
-    {user:"techbro_mnl", text:"Debugging arc is real 😂🐛"},
-    {user:"ojt_diary_ph", text:"The sync fix must've been brutal 😅"},
-    {user:"devian_codes", text:"Documenting while tired is a vibe 😴📝"},
-    {user:"bellesoft_cio", text:"Welcome to the Bellesoft alumni! 💜"},
-  ];
+  { user: "sarah_abane", text: "Learned how to analyze existing systems and translate research into structured flowcharts. It was harder than I expected to map out every user flow 🗺️" },
+  { user: "sarah_abane", text: "Biggest challenge was keeping components reusable while building so fast. I kept refactoring but it taught me a lot about React structure 💡" },
+  { user: "sarah_abane", text: "Auth was intimidating at first. Understanding JWT flow and role-based access took me a full day — but clicking moment finally came 🔑" },
+  { user: "sarah_abane", text: "WebSockets were new territory for me. The hardest part was handling disconnection states and ensuring the UI always reflects the latest data ⚡" },
+  { user: "sarah_abane", text: "Learned that code splitting is not just about performance — it also forces you to think about component responsibility more carefully 🧠" },
+  { user: "sarah_abane", text: "SMTP setup was trial and error. Learned so much about email deliverability, template design, and error handling for failed sends 📧" },
+  { user: "sarah_abane", text: "This week taught me that debugging is a skill, not a punishment 😅 Every bug told me something about how I was thinking about the system" },
+  { user: "sarah_abane", text: "Configuring 20+ rooms and making sure every seat syncs correctly was exhausting but satisfying. Attention to detail is everything 🏠" },
+  { user: "sarah_abane", text: "Learned that documentation is as important as code. Future me (or whoever continues this) will thank present me 📝" },
+  { user: "sarah_abane", text: "Presenting to the CIO was nerve-wracking but it made me realize how much I actually built in 10 weeks. I'm proud of this 🎤" },
+];
+
+const comment2 = [
+  { user: "sarah_abane", text: "Challenge: figuring out what features were truly essential vs. nice-to-have. Scope creep is real even in week one 😅" },
+  { user: "sarah_abane", text: "The seat map editor was the trickiest part — syncing add/delete actions between admin and client in real time without a backend yet 🔄" },
+  { user: "sarah_abane", text: "Challenge was debugging Postman requests and matching them to the actual frontend calls. Mismatched field names cost me hours 😤" },
+  { user: "sarah_abane", text: "Real challenge was making the notification dashboard feel instant without overloading the socket connection. Learned about event debouncing 🎮" },
+  { user: "sarah_abane", text: "The manage booking flow had so many edge cases — what if a booking is already cancelled? Already approved? Each state needed its own logic 🔀" },
+  { user: "sarah_abane", text: "The biggest challenge was testing every email status scenario. I must have sent 50 test emails to myself that week 📬" },
+  { user: "sarah_abane", text: "Mobile responsiveness was harder than desktop. Small screens expose every layout assumption you made without thinking 📱" },
+  { user: "sarah_abane", text: "The color state persistence bug (seats not showing correct status after page refresh) took almost two days to trace. Race condition in the data fetch 🐛" },
+  { user: "sarah_abane", text: "Standardizing modals across 10+ rooms while keeping each one's unique data handling was a real balancing act ✨" },
+  { user: "sarah_abane", text: "Biggest lesson: always build with the next developer in mind. Clean code and clear docs are a form of kindness 💙" },
+];
 
   const [counts, setCounts] = useState(likeCounts.slice());
 
@@ -450,7 +622,6 @@ const IGFeed = ({ weeksData }) => {
 
   const weekLabels = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10'];
   const storyWeeks = [
-    {label:'Your story', icon:'🏨', seen:false},
     ...weekLabels.map((w, i) => ({ label: w, icon: icons[i], seen: i >= 4, idx: i }))
   ];
 
@@ -459,132 +630,63 @@ const IGFeed = ({ weeksData }) => {
   return (
     <div style={{ background:'#faf9f6', fontFamily:"'Georgia', 'Times New Roman', serif", maxWidth:'600px', margin:'0 auto', width:'100%' }}>
 
-      {/* ── NAV ── */}
-      <div style={{
-        display:'flex', alignItems:'center', justifyContent:'space-between',
-        padding:'10px 16px', borderBottom:'1px solid rgba(0,0,0,0.1)',
-        position:'sticky', top:0, background:'rgba(250,249,246,0.95)',
-        backdropFilter:'blur(8px)', zIndex:100
-      }}>
-        <span style={{
-          fontSize:'18px', fontWeight:700, letterSpacing:'0.05em',
-          fontFamily:"'Georgia', serif", color:'#1a1a1a',
-          fontStyle:'italic'
-        }}>ojtblog</span>
+      {/* NAV */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 16px', borderBottom:'1px solid rgba(0,0,0,0.1)', position:'sticky', top:0, background:'rgba(250,249,246,0.95)', backdropFilter:'blur(8px)', zIndex:100 }}>
+        <span style={{ fontSize:'18px', fontWeight:700, letterSpacing:'0.05em', fontFamily:"'Georgia', serif", color:'#1a1a1a', fontStyle:'italic' }}>ojtblog</span>
         <div style={{ display:'flex', gap:'16px', alignItems:'center' }}>
-          <svg width="20" height="20" fill="none" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{cursor:'pointer'}}>
-            <rect x="3" y="3" width="14" height="14" rx="3"/><line x1="10" y1="7" x2="10" y2="13"/><line x1="7" y1="10" x2="13" y2="10"/>
-          </svg>
-          <div style={{position:'relative'}}>
-            <svg width="20" height="20" fill="none" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{cursor:'pointer'}}>
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" transform="scale(0.83) translate(1.2,1.2)"/>
-            </svg>
-            <span style={{position:'absolute',top:'-2px',right:'-2px',width:'7px',height:'7px',background:'#1a1a1a',borderRadius:'50%',border:'1.5px solid #faf9f6'}}/>
-          </div>
-          <div style={{position:'relative'}}>
-            <svg width="20" height="20" fill="none" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{cursor:'pointer'}}>
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" transform="scale(0.83) translate(1.2,1.2)"/>
-            </svg>
-            <span style={{position:'absolute',top:'-2px',right:'-2px',width:'7px',height:'7px',background:'#1a1a1a',borderRadius:'50%',border:'1.5px solid #faf9f6'}}/>
-          </div>
+          <svg width="20" height="20" fill="none" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{cursor:'pointer'}}><rect x="3" y="3" width="14" height="14" rx="3"/><line x1="10" y1="7" x2="10" y2="13"/><line x1="7" y1="10" x2="13" y2="10"/></svg>
+          <div style={{position:'relative'}}><svg width="20" height="20" fill="none" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{cursor:'pointer'}}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" transform="scale(0.83) translate(1.2,1.2)"/></svg><span style={{position:'absolute',top:'-2px',right:'-2px',width:'7px',height:'7px',background:'#1a1a1a',borderRadius:'50%',border:'1.5px solid #faf9f6'}}/></div>
+          <div style={{position:'relative'}}><svg width="20" height="20" fill="none" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{cursor:'pointer'}}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" transform="scale(0.83) translate(1.2,1.2)"/></svg><span style={{position:'absolute',top:'-2px',right:'-2px',width:'7px',height:'7px',background:'#1a1a1a',borderRadius:'50%',border:'1.5px solid #faf9f6'}}/></div>
         </div>
       </div>
 
-      {/* ── STORIES ── */}
-      <div style={{
-        display:'flex', gap:'10px', padding:'10px 14px',
-        overflowX:'auto', borderBottom:'1px solid rgba(0,0,0,0.08)',
-        scrollbarWidth:'none'
-      }}>
+      {/* STORIES / WEEK NAV — highlighted */}
+      <div style={{ display:'flex', gap:'10px', padding:'10px 14px', overflowX:'auto', borderBottom:'1px solid rgba(0,0,0,0.08)', scrollbarWidth:'none' }}>
         {storyWeeks.map((s, i) => (
-          <div
-            key={i}
-            onClick={() => {
-              if (i === 0) return;
-              const idx = s.idx;
-              setActiveWeek(prev => prev === idx ? null : idx);
-            }}
-            style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'4px', flexShrink:0, cursor: i === 0 ? 'default' : 'pointer' }}
-          >
+          <div key={i} onClick={() => { handleSetActiveWeek(activeWeek === s.idx ? null : s.idx); }} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'4px', flexShrink:0, cursor:'pointer' }}>
+            {/* Ring: highlighted when active */}
             <div style={{
               width:'50px', height:'50px', borderRadius:'50%', padding:'2px',
-              background: i > 0 && activeWeek === s.idx
+              background: activeWeek === s.idx
                 ? '#1a1a1a'
                 : s.seen
                   ? 'rgba(0,0,0,0.1)'
                   : 'conic-gradient(#1a1a1a 0deg, #555 120deg, #999 240deg, #1a1a1a 360deg)',
-              transition:'all 0.2s'
+              transition:'all 0.2s',
+              boxShadow: activeWeek === s.idx ? '0 0 0 2px #1a1a1a, 0 0 0 4px #faf9f6' : 'none',
             }}>
-              <div style={{
-                width:'100%', height:'100%', borderRadius:'50%',
-                background:'#faf9f6', border:'2px solid #faf9f6',
-                display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px'
-              }}>{s.icon}</div>
+              <div style={{ width:'100%', height:'100%', borderRadius:'50%', background:'#faf9f6', border:'2px solid #faf9f6', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px' }}>{s.icon}</div>
             </div>
             <span style={{
-              fontSize:'10px', color: i > 0 && activeWeek === s.idx ? '#1a1a1a' : 'rgba(0,0,0,0.55)',
-              fontFamily:"'Georgia', serif", fontWeight: i > 0 && activeWeek === s.idx ? '700' : '400',
-              maxWidth:'50px', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'
+              fontSize:'10px',
+              color: activeWeek === s.idx ? '#1a1a1a' : 'rgba(0,0,0,0.55)',
+              fontFamily:"'Georgia', serif",
+              fontWeight: activeWeek === s.idx ? '900' : '400',
+              maxWidth:'50px', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
+              textDecoration: activeWeek === s.idx ? 'underline' : 'none',
+              textUnderlineOffset:'2px',
             }}>{s.label}</span>
           </div>
         ))}
       </div>
 
-      {/* ── ACTIVE WEEK LABEL ── */}
+      {/* ACTIVE WEEK LABEL */}
       {activeWeek !== null && (
-        <div style={{
-          padding:'8px 14px', background:'rgba(0,0,0,0.03)',
-          borderBottom:'1px solid rgba(0,0,0,0.08)',
-          display:'flex', alignItems:'center', justifyContent:'space-between'
-        }}>
-          <span style={{ fontSize:'11px', fontFamily:"'Georgia', serif", color:'rgba(0,0,0,0.5)', letterSpacing:'0.1em', textTransform:'uppercase' }}>
-            Showing: <strong style={{color:'#1a1a1a'}}>{weekLabels[activeWeek]}</strong>
-          </span>
-          <button
-            onClick={() => setActiveWeek(null)}
-            style={{ background:'transparent', border:'none', fontSize:'11px', color:'rgba(0,0,0,0.4)', cursor:'pointer', fontFamily:"'Georgia', serif", textDecoration:'underline' }}
-          >Show all</button>
+        <div style={{ padding:'8px 14px', background:'rgba(0,0,0,0.03)', borderBottom:'1px solid rgba(0,0,0,0.08)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <span style={{ fontSize:'11px', fontFamily:"'Georgia', serif", color:'rgba(0,0,0,0.5)', letterSpacing:'0.1em', textTransform:'uppercase' }}>Showing: <strong style={{color:'#1a1a1a'}}>{weekLabels[activeWeek]}</strong></span>
+          <button onClick={() => handleSetActiveWeek(null)} style={{ background:'transparent', border:'none', fontSize:'11px', color:'rgba(0,0,0,0.4)', cursor:'pointer', fontFamily:"'Georgia', serif", textDecoration:'underline' }}>Show all</button>
         </div>
       )}
 
-      {/* ── CLOCK TOGGLE ── */}
-      <div style={{ background:'#faf9f6', borderBottom:'1px solid rgba(0,0,0,0.08)' }}>
-        <div style={{ padding:'10px 14px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-            <div style={{ width:'30px', height:'30px', borderRadius:'50%', background:'rgba(0,0,0,0.06)', border:'1px solid rgba(0,0,0,0.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'14px' }}>🕐</div>
-            <div>
-              <div style={{ fontSize:'12px', fontWeight:700, color:'#1a1a1a', fontFamily:"'Georgia', serif" }}>sarah_abane</div>
-              <div style={{ fontSize:'10px', color:'rgba(0,0,0,0.4)', fontFamily:"'Georgia', serif" }}>OJT Clock · Weekly Overview</div>
-            </div>
-          </div>
-          <button onClick={() => setShowClock(v => !v)} style={{
-            background:'transparent', border:'1px solid rgba(0,0,0,0.2)',
-            color:'#1a1a1a', fontSize:'10px', padding:'5px 12px', borderRadius:'3px',
-            cursor:'pointer', fontWeight:700, fontFamily:"'Georgia', serif", letterSpacing:'0.08em',
-            textTransform:'uppercase'
-          }}>{showClock ? 'Hide' : 'View Clock'}</button>
-        </div>
-        {showClock && (
-          <div style={{ borderTop:'1px solid rgba(0,0,0,0.06)', background:'#faf9f6' }}>
-            <WeeklyClock activeWeek={activeWeek} onWeekClick={setActiveWeek} />
-          </div>
-        )}
-      </div>
-
-      {/* ── POSTS ── */}
-      {visiblePosts.map((week, _) => {
+      {/* POSTS */}
+      {visiblePosts.map((week) => {
         const i = weeksData.indexOf(week);
         return (
           <div key={week.id} style={{ background:'#faf9f6', borderBottom:'1px solid rgba(0,0,0,0.08)' }}>
-
             {/* Post Header */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 12px' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                <div style={{
-                  width:'30px', height:'30px', borderRadius:'50%',
-                  background:'rgba(0,0,0,0.06)', border:'1px solid rgba(0,0,0,0.12)',
-                  display:'flex', alignItems:'center', justifyContent:'center', fontSize:'14px', flexShrink:0
-                }}>{icons[i]}</div>
+                <div style={{ width:'30px', height:'30px', borderRadius:'50%', background:'rgba(0,0,0,0.06)', border:'1px solid rgba(0,0,0,0.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'14px', flexShrink:0 }}>{icons[i]}</div>
                 <div>
                   <div style={{ fontSize:'12px', fontWeight:700, color:'#1a1a1a', fontFamily:"'Georgia', serif" }}>sarah_abane</div>
                   <div style={{ fontSize:'10px', color:'rgba(0,0,0,0.4)', fontFamily:"'Georgia', serif" }}>OJT @ The Bellevue Manila</div>
@@ -593,134 +695,71 @@ const IGFeed = ({ weeksData }) => {
               <span style={{ fontSize:'18px', color:'rgba(0,0,0,0.35)', cursor:'pointer', letterSpacing:'0.1em' }}>···</span>
             </div>
 
-            {/* ── Week title card (decorative, above images) ── */}
+            {/* Week title card */}
             <div style={{
-              width:'100%', aspectRatio:'4/1.2',
+              width:'100%',
+              height:'80px',
               background: bgPatterns[i],
               display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
               position:'relative', overflow:'hidden',
               borderTop:'1px solid rgba(0,0,0,0.06)',
             }}>
-              <div style={{ position:'absolute', inset:'10px', border:'1px solid rgba(0,0,0,0.08)', pointerEvents:'none' }} />
-              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'4px', padding:'12px 32px', zIndex:1, textAlign:'center' }}>
-                <span style={{ fontSize:'8px', fontWeight:700, letterSpacing:'0.3em', textTransform:'uppercase', color:'rgba(0,0,0,0.3)', fontFamily:"'Georgia', serif" }}>
-                  — Week {week.id} —
-                </span>
-                <span style={{
-                  fontSize:'clamp(16px,3.5vw,22px)', fontWeight:900,
-                  letterSpacing:'-0.02em', textAlign:'center', lineHeight:1.2,
-                  color:'#1a1a1a', fontFamily:"'Georgia', serif"
-                }}>{week.name}</span>
-                <span style={{ fontSize:'10px', color:'rgba(0,0,0,0.4)', fontFamily:"'Georgia', serif", fontStyle:'italic' }}>{week.dates}</span>
+              <div style={{ position:'absolute', inset:'8px', border:'1px solid rgba(0,0,0,0.08)', pointerEvents:'none' }} />
+              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'2px', padding:'8px 32px', zIndex:1, textAlign:'center' }}>
+                <span style={{ fontSize:'8px', fontWeight:700, letterSpacing:'0.3em', textTransform:'uppercase', color:'rgba(0,0,0,0.3)', fontFamily:"'Georgia', serif" }}>— Week {week.id} —</span>
+                <span style={{ fontSize:'clamp(12px,2.5vw,16px)', fontWeight:900, letterSpacing:'-0.02em', textAlign:'center', lineHeight:1.1, color:'#1a1a1a', fontFamily:"'Georgia', serif" }}>{week.name}</span>
+                <span style={{ fontSize:'9px', color:'rgba(0,0,0,0.4)', fontFamily:"'Georgia', serif", fontStyle:'italic' }}>{week.dates}</span>
               </div>
-              <span style={{
-                position:'absolute', right:'16px', top:'50%', transform:'translateY(-50%)',
-                fontSize:'clamp(40px,8vw,60px)', fontWeight:900,
-                lineHeight:1, color:'rgba(0,0,0,0.05)', letterSpacing:'-3px',
-                userSelect:'none', pointerEvents:'none', fontFamily:"'Georgia', serif"
-              }}>{week.id}</span>
-              <span style={{
-                position:'absolute', top:'10px', left:'12px',
-                fontSize:'8px', fontWeight:700, letterSpacing:'0.15em', textTransform:'uppercase',
-                color:'rgba(0,0,0,0.25)', fontFamily:"'Georgia', serif"
-              }}>{week.category}</span>
+              <span style={{ position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)', fontSize:'clamp(24px,5vw,40px)', fontWeight:900, lineHeight:1, color:'rgba(0,0,0,0.05)', letterSpacing:'-3px', userSelect:'none', pointerEvents:'none', fontFamily:"'Georgia', serif" }}>{week.id}</span>
+              <span style={{ position:'absolute', top:'8px', left:'12px', fontSize:'8px', fontWeight:700, letterSpacing:'0.15em', textTransform:'uppercase', color:'rgba(0,0,0,0.25)', fontFamily:"'Georgia', serif" }}>{week.category}</span>
             </div>
 
-            {/* ── INLINE IMAGE CAROUSEL ── */}
-            <InlineImageCarousel images={week.images} weekId={week.id} />
+            {/* INLINE IMAGE CAROUSEL */}
+            <InlineImageCarousel images={week.images} />
 
             {/* Actions */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 12px' }}>
               <div style={{ display:'flex', gap:'12px', alignItems:'center' }}>
                 <button onClick={() => toggleLike(i)} style={{ background:'none', border:'none', cursor:'pointer', padding:'2px', display:'flex', alignItems:'center' }}>
-                  <svg width="20" height="20" fill={likedPosts.has(i) ? '#1a1a1a' : 'none'} stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" transform="scale(0.83) translate(1.2,1.2)"/>
-                  </svg>
+                  <svg width="20" height="20" fill={likedPosts.has(i) ? '#1a1a1a' : 'none'} stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" transform="scale(0.83) translate(1.2,1.2)"/></svg>
                 </button>
                 <button style={{ background:'none', border:'none', cursor:'pointer', padding:'2px', display:'flex', alignItems:'center' }}>
-                  <svg width="20" height="20" fill="none" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" transform="scale(0.83) translate(1.2,1.2)"/>
-                  </svg>
+                  <svg width="20" height="20" fill="none" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" transform="scale(0.83) translate(1.2,1.2)"/></svg>
                 </button>
                 <button style={{ background:'none', border:'none', cursor:'pointer', padding:'2px', display:'flex', alignItems:'center' }}>
-                  <svg width="20" height="20" fill="none" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18.5" y1="1.7" x2="9.2" y2="10.8" transform="scale(0.83) translate(1.2,1.2)"/>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2" transform="scale(0.83) translate(1.2,1.2)"/>
-                  </svg>
+                  <svg width="20" height="20" fill="none" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="18.5" y1="1.7" x2="9.2" y2="10.8" transform="scale(0.83) translate(1.2,1.2)"/><polygon points="22 2 15 22 11 13 2 9 22 2" transform="scale(0.83) translate(1.2,1.2)"/></svg>
                 </button>
               </div>
               <button onClick={() => toggleSave(i)} style={{ background:'none', border:'none', cursor:'pointer', padding:'2px', display:'flex', alignItems:'center' }}>
-                <svg width="20" height="20" fill={savedPosts.has(i) ? '#1a1a1a' : 'none'} stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" transform="scale(0.83) translate(1.2,1.2)"/>
-                </svg>
+                <svg width="20" height="20" fill={savedPosts.has(i) ? '#1a1a1a' : 'none'} stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" transform="scale(0.83) translate(1.2,1.2)"/></svg>
               </button>
             </div>
 
-            <div style={{ padding:'0 12px 3px', fontSize:'12px', fontWeight:700, color:'#1a1a1a', fontFamily:"'Georgia', serif" }}>
-              {counts[i].toLocaleString()} likes
-            </div>
-
-            {/* Caption */}
+            <div style={{ padding:'0 12px 3px', fontSize:'12px', fontWeight:700, color:'#1a1a1a', fontFamily:"'Georgia', serif" }}>{counts[i].toLocaleString()} likes</div>
             <div style={{ padding:'0 12px 3px', fontSize:'12px', lineHeight:1.5, color:'#1a1a1a', fontFamily:"'Georgia', serif" }}>
               <strong style={{ fontWeight:700 }}>sarah_abane</strong>{' '}
               <span style={{ color:'rgba(0,0,0,0.7)' }}>{captions[i]}</span>{' '}
               <span style={{ color:'rgba(0,0,0,0.4)', fontSize:'11px' }}>{hashtags[i]}</span>
             </div>
-
-            {/* Week details as expandable caption */}
             <div style={{ padding:'0 12px 4px' }}>
               <details style={{ fontFamily:"'Georgia', serif" }}>
-                <summary style={{ fontSize:'11px', color:'rgba(0,0,0,0.4)', cursor:'pointer', listStyle:'none', fontStyle:'italic' }}>
-                  View week details ▾
-                </summary>
+                <summary style={{ fontSize:'11px', color:'rgba(0,0,0,0.4)', cursor:'pointer', listStyle:'none', fontStyle:'italic' }}>View week details ▾</summary>
                 <div style={{ marginTop:'6px', padding:'10px', background:'rgba(0,0,0,0.02)', borderRadius:'3px', border:'1px solid rgba(0,0,0,0.06)' }}>
-                  <p style={{ fontSize:'11px', color:'rgba(0,0,0,0.65)', lineHeight:1.6, marginBottom:'6px', fontFamily:"'Georgia', serif" }}>
-                    {week.description}
-                  </p>
-                  <p style={{ fontSize:'10px', color:'rgba(0,0,0,0.4)', fontFamily:"'Georgia', serif", marginBottom:'4px' }}>
-                    <strong>Topics:</strong> {week.topics}
-                  </p>
-                  <p style={{ fontSize:'10px', color:'rgba(0,0,0,0.4)', fontFamily:"'Georgia', serif" }}>
-                    <strong>Outcomes:</strong> {week.outcomes}
-                  </p>
+                  <p style={{ fontSize:'11px', color:'rgba(0,0,0,0.65)', lineHeight:1.6, marginBottom:'6px', fontFamily:"'Georgia', serif" }}>{week.description}</p>
+                  <p style={{ fontSize:'10px', color:'rgba(0,0,0,0.4)', fontFamily:"'Georgia', serif", marginBottom:'4px' }}><strong>Topics:</strong> {week.topics}</p>
+                  <p style={{ fontSize:'10px', color:'rgba(0,0,0,0.4)', fontFamily:"'Georgia', serif" }}><strong>Outcomes:</strong> {week.outcomes}</p>
                 </div>
               </details>
             </div>
-
-            <div style={{ padding:'0 12px 2px', fontSize:'11px', color:'rgba(0,0,0,0.4)', cursor:'pointer', fontFamily:"'Georgia', serif", fontStyle:'italic' }}>
-              View all {commentCounts[i]} comments
-            </div>
-
-            {/* Comments */}
-            <div style={{ padding:'0 12px 2px', fontSize:'12px', color:'#1a1a1a', lineHeight:1.5, fontFamily:"'Georgia', serif" }}>
-              <strong style={{ fontWeight:700 }}>{comment1[i].user}</strong>{' '}{comment1[i].text}
-            </div>
-            <div style={{ padding:'0 12px 2px', fontSize:'12px', color:'#1a1a1a', lineHeight:1.5, fontFamily:"'Georgia', serif" }}>
-              <strong style={{ fontWeight:700 }}>{comment2[i].user}</strong>{' '}{comment2[i].text}
-            </div>
-
-            <div style={{ padding:'2px 12px 6px', fontSize:'9px', color:'rgba(0,0,0,0.3)', letterSpacing:'0.12em', textTransform:'uppercase', fontFamily:"'Georgia', serif" }}>
-              {times[i]}
-            </div>
-
+            <div style={{ padding:'0 12px 2px', fontSize:'11px', color:'rgba(0,0,0,0.4)', cursor:'pointer', fontFamily:"'Georgia', serif", fontStyle:'italic' }}>View all {commentCounts[i]} comments</div>
+            <div style={{ padding:'0 12px 2px', fontSize:'12px', color:'#1a1a1a', lineHeight:1.5, fontFamily:"'Georgia', serif" }}><strong style={{ fontWeight:700 }}>{comment1[i].user}</strong>{' '}{comment1[i].text}</div>
+            <div style={{ padding:'0 12px 2px', fontSize:'12px', color:'#1a1a1a', lineHeight:1.5, fontFamily:"'Georgia', serif" }}><strong style={{ fontWeight:700 }}>{comment2[i].user}</strong>{' '}{comment2[i].text}</div>
+            <div style={{ padding:'2px 12px 6px', fontSize:'9px', color:'rgba(0,0,0,0.3)', letterSpacing:'0.12em', textTransform:'uppercase', fontFamily:"'Georgia', serif" }}>{times[i]}</div>
             <div style={{ display:'flex', alignItems:'center', padding:'6px 12px', borderTop:'0.5px solid rgba(0,0,0,0.07)', gap:'8px' }}>
-              <div style={{
-                width:'22px', height:'22px', borderRadius:'50%',
-                background:'#1a1a1a',
-                display:'flex', alignItems:'center', justifyContent:'center',
-                fontSize:'9px', fontWeight:700, color:'#faf9f6', flexShrink:0,
-                fontFamily:"'Georgia', serif"
-              }}>DA</div>
-              <input
-                type="text"
-                placeholder="Add a comment..."
-                style={{ flex:1, background:'none', border:'none', color:'rgba(0,0,0,0.5)', fontSize:'12px', outline:'none', fontFamily:"'Georgia', serif" }}
-              />
-              <button style={{ fontSize:'12px', fontWeight:700, color:'rgba(0,0,0,0.5)', cursor:'pointer', background:'none', border:'none', fontFamily:"'Georgia', serif" }}>
-                Post
-              </button>
+              <div style={{ width:'22px', height:'22px', borderRadius:'50%', background:'#1a1a1a', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'9px', fontWeight:700, color:'#faf9f6', flexShrink:0, fontFamily:"'Georgia', serif" }}>SA</div>
+              <input type="text" placeholder="Add a comment..." style={{ flex:1, background:'none', border:'none', color:'rgba(0,0,0,0.5)', fontSize:'12px', outline:'none', fontFamily:"'Georgia', serif" }} />
+              <button style={{ fontSize:'12px', fontWeight:700, color:'rgba(0,0,0,0.5)', cursor:'pointer', background:'none', border:'none', fontFamily:"'Georgia', serif" }}>Post</button>
             </div>
-
           </div>
         );
       })}
@@ -728,23 +767,139 @@ const IGFeed = ({ weeksData }) => {
   );
 };
 
-// ─── MAIN PORTFOLIO ───────────────────────────────────────────────────────────
-const DevianPortfolio = () => {
-  const heroSceneRef = useRef(null);
-  const heroAfterRef = useRef(null);
-  const marqueeTrackRef = useRef(null);
-  const contactInnerRef = useRef(null);
-  const creativeSectionRef = useRef(null);
-  const wordsSectionRef = useRef(null);
-  const wordTextRef = useRef(null);
-  const statsSectionRef = useRef(null);
-  const expertiseSectionRef = useRef(null);
-  const contactSectionRef = useRef(null);
+// ─── CURSOR TRAIL ─────────────────────────────────────────────────────────────
+const CursorTrail = () => {
+  const canvasRef = useRef(null);
+  const particles = useRef([]);
+  const rafRef = useRef(null);
 
-  const [selectedWork, setSelectedWork] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Gold color palette — rich golds, champagnes, warm whites
+  const goldColors = [
+    { r:255, g:215, b:0   },   // pure gold
+    { r:255, g:223, b:80  },   // bright gold
+    { r:212, g:175, b:55  },   // deep gold
+    { r:255, g:239, b:150 },   // champagne
+    { r:255, g:248, b:200 },   // pale glitter
+    { r:232, g:190, b:50  },   // antique gold
+    { r:255, g:255, b:220 },   // warm white shimmer
+  ];
 
-  const weeksData = [
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const onMove = (e) => {
+      for (let k = 0; k < 7; k++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 2.5 + 0.5;
+        const color = goldColors[Math.floor(Math.random() * goldColors.length)];
+        const type = Math.random() < 0.5 ? 'star' : 'circle';
+        particles.current.push({
+          x: e.clientX + (Math.random() - 0.5) * 8,
+          y: e.clientY + (Math.random() - 0.5) * 8,
+          vx: Math.cos(angle) * speed * 0.6,
+          vy: Math.sin(angle) * speed * 0.6 - Math.random() * 1.5,
+          life: 1,
+          decay: Math.random() * 0.018 + 0.008,
+          size: Math.random() * 5 + 2,
+          color,
+          type,
+          rotation: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.15,
+          twinkle: Math.random() * Math.PI * 2,
+          twinkleSpeed: Math.random() * 0.2 + 0.1,
+        });
+      }
+    };
+    window.addEventListener('mousemove', onMove);
+
+    const drawStar = (ctx, x, y, size, rotation, alpha, color) => {
+      const spikes = 4;
+      const outerR = size;
+      const innerR = size * 0.35;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation);
+      ctx.beginPath();
+      for (let i = 0; i < spikes * 2; i++) {
+        const r = i % 2 === 0 ? outerR : innerR;
+        const a = (i * Math.PI) / spikes;
+        i === 0 ? ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r)
+                : ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+      }
+      ctx.closePath();
+      ctx.fillStyle = `rgba(${color.r},${color.g},${color.b},${alpha})`;
+      ctx.shadowColor = `rgba(${color.r},${color.g},${color.b},${alpha * 0.8})`;
+      ctx.shadowBlur = size * 2.5;
+      ctx.fill();
+      ctx.restore();
+    };
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.current = particles.current.filter(p => p.life > 0);
+
+      for (const p of particles.current) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.04;
+        p.vx *= 0.97;
+        p.life -= p.decay;
+        p.rotation += p.rotSpeed;
+        p.twinkle += p.twinkleSpeed;
+
+        const twinkleAlpha = 0.5 + 0.5 * Math.sin(p.twinkle);
+        const alpha = Math.max(0, p.life * twinkleAlpha * 0.9);
+        const currentSize = Math.max(0.5, p.size * p.life);
+
+        ctx.shadowBlur = 0;
+
+        if (p.type === 'star') {
+          drawStar(ctx, p.x, p.y, currentSize, p.rotation, alpha, p.color);
+        } else {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, currentSize * 0.6, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${p.color.r},${p.color.g},${p.color.b},${alpha})`;
+          ctx.shadowColor = `rgba(${p.color.r},${p.color.g},${p.color.b},${alpha * 0.8})`;
+          ctx.shadowBlur = currentSize * 3;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      rafRef.current = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position:'fixed', top:0, left:0, width:'100%', height:'100%',
+        pointerEvents:'none', zIndex:9999,
+      }}
+    />
+  );
+};
+
+// ─── OJT feed week metadata (carousel uses src/assets/weeks/weekN/* when present) ───
+const RAW_WEEKS_DATA_FOR_FEED = [
     { id:'01', name:'WEEK ONE',   dates:'February 24–27, 2026', category:'RESEARCH & SYSTEM ANALYSIS',
       description:'Focused on research and development related to seat and table management systems used in hotels, restaurants, and event venues. Analyzed existing reservation platforms and studied their workflows, functionalities, and user interfaces.',
       topics:'System Research, Competitor Analysis, Flowchart Design, UI/UX Wireframing', duration:'4 days',
@@ -795,9 +950,38 @@ const DevianPortfolio = () => {
       topics:'System Review, CIO Presentation, Documentation, Project Endorsement, Recommendations', duration:'4 days',
       outcomes:'Reviewed all modules end-to-end, presented to Sir Mark Jerome Castillo (CIO), finalized presentation materials and documentation, documented revisions and pending improvements, and endorsed the system to the next OJT trainee.',
       images:['https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&q=80&fit=crop','https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80&fit=crop','https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80&fit=crop'] },
-  ];
+];
 
-  const openModal = (work) => { setSelectedWork(work); setIsModalOpen(true); document.body.style.overflow = 'hidden'; };
+// ─── MAIN PORTFOLIO ───────────────────────────────────────────────────────────
+const DevianPortfolio = () => {
+  const heroSceneRef = useRef(null);
+  const heroAfterRef = useRef(null);
+  const marqueeTrackRef = useRef(null);
+  const contactInnerRef = useRef(null);
+  const creativeSectionRef = useRef(null);
+  const wordsSectionRef = useRef(null);
+  const wordTextRef = useRef(null);
+  const statsSectionRef = useRef(null);
+  const expertiseSectionRef = useRef(null);
+  const contactSectionRef = useRef(null);
+
+  const [selectedWork, setSelectedWork] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Shared active week state between feed and reports
+  const [sharedActiveWeek, setSharedActiveWeek] = useState(null);
+
+  const weeksData = useMemo(
+    () =>
+      RAW_WEEKS_DATA_FOR_FEED.map((w) => {
+        const local = WEEK_GALLERY_BY_ID[w.id];
+        return {
+          ...w,
+          images: local && local.length > 0 ? local : w.images,
+        };
+      }),
+    []
+  );
+
   const closeModal = () => { setIsModalOpen(false); setSelectedWork(null); document.body.style.overflow = 'unset'; };
 
   useEffect(() => {
@@ -850,20 +1034,11 @@ const DevianPortfolio = () => {
         });
       }
 
-      // Animate the decorative side images in the words section
       const decorLeftEl = document.querySelector('.words__decor-left');
       const decorRightEl = document.querySelector('.words__decor-right');
       if (decorLeftEl && decorRightEl && wordsSectionRef.current) {
-        gsap.fromTo(decorLeftEl,
-          { x: -60, opacity: 0 },
-          { x: 0, opacity: 1, duration: 1.2, ease: 'power3.out',
-            scrollTrigger: { trigger: wordsSectionRef.current, start: 'top 70%', toggleActions: 'play none none reverse' } }
-        );
-        gsap.fromTo(decorRightEl,
-          { x: 60, opacity: 0 },
-          { x: 0, opacity: 1, duration: 1.2, ease: 'power3.out',
-            scrollTrigger: { trigger: wordsSectionRef.current, start: 'top 70%', toggleActions: 'play none none reverse' } }
-        );
+        gsap.fromTo(decorLeftEl, { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: wordsSectionRef.current, start: 'top 70%', toggleActions: 'play none none reverse' } });
+        gsap.fromTo(decorRightEl, { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: wordsSectionRef.current, start: 'top 70%', toggleActions: 'play none none reverse' } });
       }
 
       const statsSection = statsSectionRef.current;
@@ -886,7 +1061,7 @@ const DevianPortfolio = () => {
       if (track) {
         track.innerHTML += track.innerHTML;
         const trackWidth = track.scrollWidth / 2;
-        gsap.to(track, { x:-trackWidth, duration:22, ease:'none', repeat:-1 });
+        gsap.to(track, { x:-trackWidth, duration:65, ease:'none', repeat:-1 });
       }
     }, 200);
 
@@ -895,6 +1070,9 @@ const DevianPortfolio = () => {
 
   return (
     <>
+      {/* CURSOR TRAIL */}
+      <CursorTrail />
+
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
         :root{--black:#1a1a1a;--white:#faf9f6;--cream:#f0ede8;--gray:#e8e4df}
@@ -913,7 +1091,6 @@ const DevianPortfolio = () => {
         .hero__sticky{position:sticky;top:0;height:100vh;overflow:hidden;background:#ffffff}
         .hero__scene{position:absolute;inset:0;transform-origin:50% 50%;will-change:transform;background:#ffffff}
         .hero__wordmark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;user-select:none;z-index:2}
-        .hero__wordmark span{font-size:12vw;font-weight:900;line-height:1;letter-spacing:-0.04em;color:var(--black);font-family:'Georgia',serif}
         .hero__img{position:absolute;overflow:hidden;z-index:1}
         .hero__after{position:absolute;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;pointer-events:none;z-index:10}
 
@@ -924,36 +1101,20 @@ const DevianPortfolio = () => {
         .creative__word{display:inline-block;transform:translateY(110%)}
         .creative p{margin-top:48px;color:rgba(255,255,255,0.3);font-size:11px;letter-spacing:0.3em;text-transform:uppercase;font-family:'Georgia',serif}
 
-        /* WORDS section — bigger side decoratives */
         .words{position:relative;height:250vh;background:var(--white)}
         .words__sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;padding:0 40px;overflow:hidden}
         .words__text{max-width:480px;text-align:center;font-size:clamp(14px,1.8vw,24px);font-weight:700;line-height:1.5;font-family:'Georgia',serif;position:relative;z-index:2}
         .words__text span{display:inline-block;margin:0 4px 4px 0;color:var(--black);opacity:0.07;transform:translateY(16px)}
 
-        /* ── BIGGER decorative side images ── */
         .words__decor-left{
-          position:absolute;
-          left:-2vw;
-          top:50%;
-          transform:translateY(-50%);
-          width:clamp(200px,26vw,380px);
-          pointer-events:none;
-          opacity:0;
-          z-index:1;
+          position:absolute;left:6vw;top:50%;transform:translateY(-50%);
+          width:clamp(260px,30vw,460px);pointer-events:none;opacity:0;z-index:1;
         }
         .words__decor-right{
-          position:absolute;
-          right:-2vw;
-          top:50%;
-          transform:translateY(-50%);
-          width:clamp(200px,26vw,380px);
-          pointer-events:none;
-          opacity:0;
-          z-index:1;
+          position:absolute;right:6vw;top:50%;transform:translateY(-50%);
+          width:clamp(260px,30vw,460px);pointer-events:none;opacity:0;z-index:1;
         }
-        .words__decor-left img,.words__decor-right img{
-          width:100%;height:auto;object-fit:contain;
-        }
+        .words__decor-left img,.words__decor-right img{width:100%;height:auto;object-fit:contain;}
 
         .stats{background:var(--white);padding:72px 40px;border-top:1px solid rgba(0,0,0,0.07)}
         .stats__grid{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(2,1fr);gap:40px}
@@ -961,17 +1122,20 @@ const DevianPortfolio = () => {
         .stat__val{font-size:clamp(24px,4vw,60px);font-weight:900;letter-spacing:-0.04em;line-height:1.1;font-family:'Georgia',serif}
         .stat__label{margin-top:6px;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(0,0,0,0.35);font-family:'Georgia',serif}
 
-        .marquee{background:var(--black);border-top:1px solid rgba(255,255,255,0.04);overflow:hidden;padding:24px 0}
+        .marquee{background:var(--black);border-top:1px solid rgba(255,255,255,0.04);overflow:hidden;padding:16px 0}
         .marquee__track{display:flex;gap:40px;white-space:nowrap;will-change:transform}
-        .marquee__track span{font-size:clamp(32px,6vw,64px);font-weight:900;color:rgba(255,255,255,0.06);letter-spacing:-0.03em;flex-shrink:0;font-family:'Georgia',serif}
+        .marquee__track span{font-size:clamp(20px,3.5vw,40px);font-weight:900;color:rgba(255,255,255,0.06);letter-spacing:-0.03em;flex-shrink:0;font-family:'Georgia',serif}
 
         .contact{background:var(--cream);padding:100px 24px 80px;text-align:center;position:relative;overflow:hidden;border-top:1px solid rgba(0,0,0,0.08)}
         .contact::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:1px solid rgba(0,0,0,0.05);pointer-events:none;width:70vw;height:70vw}
         .contact__inner{position:relative;z-index:2;opacity:0;transform:scale(0.88)}
         .contact__eyebrow{font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:rgba(0,0,0,0.3);margin-bottom:24px;font-family:'Georgia',serif}
-        .contact__cta{font-size:clamp(28px,6vw,88px);font-weight:900;color:var(--black);letter-spacing:-0.04em;line-height:0.9;margin-bottom:44px;font-family:'Georgia',serif;font-style:italic}
+        .contact__cta{font-size:clamp(28px,6vw,88px);font-weight:900;color:var(--black);letter-spacing:-0.04em;line-height:0.9;margin-bottom:28px;font-family:'Georgia',serif;font-style:italic}
+        .contact__links{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:20px}
         .contact__btn{display:inline-block;border:1px solid var(--black);color:var(--black);font-size:10px;letter-spacing:0.25em;text-transform:uppercase;padding:14px 40px;text-decoration:none;transition:background 0.3s,color 0.3s;font-family:'Georgia',serif}
         .contact__btn:hover{background:var(--black);color:var(--white)}
+        .contact__btn-ghost{display:inline-block;border:1px solid rgba(0,0,0,0.25);color:rgba(0,0,0,0.5);font-size:10px;letter-spacing:0.25em;text-transform:uppercase;padding:14px 28px;text-decoration:none;transition:all 0.3s;font-family:'Georgia',serif}
+        .contact__btn-ghost:hover{border-color:var(--black);color:var(--black)}
 
         .footer{background:var(--black);border-top:1px solid rgba(255,255,255,0.04);padding:28px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
         .footer__logo{font-size:18px;font-weight:900;color:var(--white);font-family:'Georgia',serif;font-style:italic}
@@ -980,22 +1144,11 @@ const DevianPortfolio = () => {
         .footer__links a:hover{color:var(--white)}
         .footer__copy{font-size:9px;color:rgba(255,255,255,0.15);font-family:'Georgia',serif}
 
-        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,9,7,0.88);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:opacity 0.3s,visibility 0.3s}
-        .modal.active{opacity:1;visibility:visible}
-        .modal__content{background:var(--white);max-width:720px;width:90%;max-height:82vh;overflow-y:auto;border-radius:2px;transform:scale(0.92);transition:transform 0.3s;position:relative;border:1px solid rgba(0,0,0,0.1)}
-        .modal.active .modal__content{transform:scale(1)}
-        .modal__header{padding:32px 32px 24px;border-bottom:1px solid rgba(0,0,0,0.08)}
-        .modal__title{font-size:clamp(20px,3.5vw,34px);font-weight:900;color:var(--black);letter-spacing:-0.03em;margin-bottom:6px;font-family:'Georgia',serif;font-style:italic}
-        .modal__close{position:absolute;top:12px;right:12px;width:36px;height:36px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--black)}
-        .modal__close:hover{background:rgba(0,0,0,0.05)}
-        .modal__footer{padding:16px 32px;border-top:1px solid rgba(0,0,0,0.07);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-        .modal__link{display:inline-block;border:1px solid var(--black);color:var(--black);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;padding:9px 20px;text-decoration:none;transition:all 0.3s;background:transparent;cursor:pointer;font-family:'Georgia',serif}
-        .modal__link:hover{background:var(--black);color:var(--white)}
+        details summary::-webkit-details-marker{display:none}
+        details summary{user-select:none}
 
-        details summary::-webkit-details-marker { display: none; }
-        details summary { user-select: none; }
-
-        #expertise{display:flex;justify-content:center;background:var(--white);border-top:1px solid rgba(0,0,0,0.06)}
+        #expertise{background:var(--white)}
+        #expertise ::-webkit-scrollbar{display:none}
       `}</style>
 
       {/* NAV */}
@@ -1007,11 +1160,14 @@ const DevianPortfolio = () => {
             <a href="#expertise">Journal</a>
             <a href="#contact">Contact</a>
           </div>
-          <button className="nav__cta">Portfolio</button>
+          <button
+            className="nav__cta"
+            onClick={() => window.open('https://zcrsam.github.io/sarah_portfolio/#', '_blank')}
+          >Portfolio</button>
         </div>
       </nav>
 
-      {/* HERO */}
+      {/* HERO — "x" text REMOVED from hero__wordmark */}
       <section className="hero" id="hero">
         <div className="hero__sticky">
           <div className="hero__scene" ref={heroSceneRef}>
@@ -1024,45 +1180,20 @@ const DevianPortfolio = () => {
             <div className="hero__img" style={{ top:'5%', right:'2%', width:'22%', height:'85%', zIndex:0 }}>
               <img src={heroSecRight} alt="Hero Right" style={{ objectFit:'contain', objectPosition:'center' }} />
             </div>
-            <div className="hero__wordmark"><span>x</span></div>
-            <p style={{
-              position:'absolute', bottom:'10vh', left:'50%', transform:'translateX(-50%)',
-              fontSize:'10px', letterSpacing:'0.25em', textTransform:'uppercase',
-              color:'rgba(0,0,0,0.3)', whiteSpace:'nowrap', zIndex:3, fontFamily:"'Georgia',serif"
-            }}>OJT Blog</p>
+            {/* hero__wordmark with "x" REMOVED — kept div for layout but empty */}
+            <div className="hero__wordmark"></div>
+            <p style={{ position:'absolute', bottom:'10vh', left:'50%', transform:'translateX(-50%)', fontSize:'10px', letterSpacing:'0.25em', textTransform:'uppercase', color:'rgba(0,0,0,0.3)', whiteSpace:'nowrap', zIndex:3, fontFamily:"'Georgia',serif" }}>OJT Blog</p>
           </div>
-
           <div className="hero__after" ref={heroAfterRef}>
             <div style={{ display:'flex', flexDirection:'column', alignItems:'center', position:'relative' }}>
-              <h1 style={{
-                fontSize:'clamp(36px,6vw,84px)', fontWeight:'900', color:'var(--white)',
-                lineHeight:'0.9', letterSpacing:'-0.04em', textAlign:'center',
-                marginBottom:'20px', fontFamily:"'Georgia',serif", fontStyle:'italic'
-              }}>The Bellevue<br />Manila</h1>
+              <h1 style={{ fontSize:'clamp(36px,6vw,84px)', fontWeight:'900', color:'var(--white)', lineHeight:'0.9', letterSpacing:'-0.04em', textAlign:'center', marginBottom:'20px', fontFamily:"'Georgia',serif", fontStyle:'italic' }}>The Bellevue<br />Manila</h1>
               <div style={{ position:'relative', border:'1px solid rgba(255,255,255,0.1)', padding:'8px 28px' }}>
-                {[0,1,2,3].map((i) => (
-                  <span key={i} style={{
-                    position:'absolute', width:'4px', height:'4px', borderRadius:'50%',
-                    background:'rgba(255,255,255,0.18)',
-                    top: i<2 ? -2 : 'auto', bottom: i>=2 ? -2 : 'auto',
-                    left: i%2===0 ? -2 : 'auto', right: i%2===1 ? -2 : 'auto',
-                  }} />
-                ))}
-                <h2 style={{
-                  fontSize:'clamp(11px,1.5vw,18px)', fontWeight:'600',
-                  color:'rgba(255,255,255,0.28)', letterSpacing:'0.28em',
-                  textTransform:'uppercase', fontFamily:"'Georgia',serif", textAlign:'center',
-                }}>Bellesoft Systems Inc.</h2>
+                {[0,1,2,3].map((i) => (<span key={i} style={{ position:'absolute', width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.18)', top: i<2 ? -2 : 'auto', bottom: i>=2 ? -2 : 'auto', left: i%2===0 ? -2 : 'auto', right: i%2===1 ? -2 : 'auto' }} />))}
+                <h2 style={{ fontSize:'clamp(11px,1.5vw,18px)', fontWeight:'600', color:'rgba(255,255,255,0.28)', letterSpacing:'0.28em', textTransform:'uppercase', fontFamily:"'Georgia',serif", textAlign:'center' }}>Bellesoft Systems Inc.</h2>
               </div>
               <div style={{ display:'flex', alignItems:'center', gap:'6px', marginTop:'16px' }}>
-                <svg width="10" height="12" viewBox="0 0 12 14" fill="none" style={{ flexShrink:0, opacity:0.3 }}>
-                  <path d="M6 0C3.24 0 1 2.24 1 5c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 6.5A1.5 1.5 0 1 1 6 3.5a1.5 1.5 0 0 1 0 3z" fill="white" />
-                </svg>
-                <p style={{
-                  fontSize:'clamp(9px,1vw,11px)', fontWeight:'500',
-                  color:'rgba(255,255,255,0.28)', letterSpacing:'0.18em',
-                  textTransform:'uppercase', fontFamily:"'Georgia',serif", margin:0,
-                }}>Filinvest City, Alabang, Muntinlupa, Metro Manila</p>
+                <svg width="10" height="12" viewBox="0 0 12 14" fill="none" style={{ flexShrink:0, opacity:0.3 }}><path d="M6 0C3.24 0 1 2.24 1 5c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 6.5A1.5 1.5 0 1 1 6 3.5a1.5 1.5 0 0 1 0 3z" fill="white" /></svg>
+                <p style={{ fontSize:'clamp(9px,1vw,11px)', fontWeight:'500', color:'rgba(255,255,255,0.28)', letterSpacing:'0.18em', textTransform:'uppercase', fontFamily:"'Georgia',serif", margin:0 }}>Filinvest City, Alabang, Muntinlupa, Metro Manila</p>
               </div>
             </div>
           </div>
@@ -1071,33 +1202,23 @@ const DevianPortfolio = () => {
 
       {/* CREATIVE */}
       <section className="creative" id="creative" ref={creativeSectionRef}>
-        <div className="creative__line">
-          <h1><span className="creative__word">Full Stack Developer</span></h1>
-        </div>
-        <div className="creative__line">
-          <h1 className="dim"><span className="creative__word">Intern</span></h1>
-        </div>
+        <div className="creative__line"><h1><span className="creative__word">Full Stack Developer</span></h1></div>
+        <div className="creative__line"><h1 className="dim"><span className="creative__word">Intern</span></h1></div>
         <p>Seat & Table Reservation Management System · The Bellevue Manila</p>
       </section>
 
-      {/* WORD REVEAL — bigger decorative side images */}
+      {/* WORD REVEAL */}
       <section className="words" id="words" ref={wordsSectionRef}>
         <div className="words__sticky">
-
-          {/* Left decorative image — bigger, pushed slightly out */}
           <div className="words__decor-left">
             <img src={decorLeft} alt="" aria-hidden="true" />
           </div>
-
           <p className="words__text" ref={wordTextRef}>
             <span>Built</span> <span>a</span> <span>reservation</span> <span>system</span> <span>from</span> <span>research</span> <span>to</span> <span>full</span> <span>development,</span> <span>featuring</span> <span>interactive</span> <span>seat</span> <span>mapping,</span> <span>real-time</span> <span>updates,</span> <span>and</span> <span>a</span> <span>seamless</span> <span>user</span> <span>experience</span> <span>for</span> <span>both</span> <span>clients</span> <span>and</span> <span>admins.</span>
           </p>
-
-          {/* Right decorative image — bigger, pushed slightly out */}
           <div className="words__decor-right">
             <img src={decorRight} alt="" aria-hidden="true" />
           </div>
-
         </div>
       </section>
 
@@ -1115,9 +1236,44 @@ const DevianPortfolio = () => {
         </div>
       </section>
 
-      {/* INSTAGRAM FEED — no modal, inline carousel */}
-      <section id="expertise" ref={expertiseSectionRef}>
-        <IGFeed weeksData={weeksData} />
+      {/* SIDE BY SIDE: OJT Blog (left) + Daily Reports (right) */}
+      <section
+        id="expertise"
+        ref={expertiseSectionRef}
+        style={{
+          display:'flex',
+          alignItems:'stretch',
+          background:'var(--white)',
+          borderTop:'1px solid rgba(0,0,0,0.06)',
+          /* CHANGED: use 100vh so both panels fit without outer scroll */
+          height:'100vh',
+          minHeight:0,
+        }}
+      >
+        {/* LEFT — OJT Blog Feed, independently scrollable */}
+        <div style={{
+          flex:'0 0 50%',
+          width:'50%',
+          borderRight:'1px solid rgba(0,0,0,0.08)',
+          height:'100%',
+          overflowY:'auto',
+          scrollbarWidth:'none',
+          msOverflowStyle:'none',
+        }}>
+          <IGFeed weeksData={weeksData} onActiveWeekChange={setSharedActiveWeek} />
+        </div>
+
+        {/* RIGHT — Daily Reports, independently scrollable */}
+        <div style={{
+          flex:'0 0 50%',
+          width:'50%',
+          height:'100%',
+          overflowY:'auto',
+          scrollbarWidth:'none',
+          msOverflowStyle:'none',
+        }}>
+          <DailyReportSection inline activeWeekFromFeed={sharedActiveWeek} />
+        </div>
       </section>
 
       {/* MARQUEE */}
@@ -1135,36 +1291,27 @@ const DevianPortfolio = () => {
       {/* CONTACT */}
       <section className="contact" id="contact" ref={contactSectionRef}>
         <div className="contact__inner" ref={contactInnerRef}>
-          <p className="contact__eyebrow">Let's work together</p>
-          <h2 className="contact__cta">VIEW MY PORTFOLIO</h2>
-          <a href="#" className="contact__btn">Portfolio</a>
-        </div>
-      </section>
-
-      {/* WORKS MODAL (kept for openModal if needed elsewhere) */}
-      {isModalOpen && selectedWork && (
-        <div className={`modal ${isModalOpen ? 'active' : ''}`} onClick={closeModal}>
-          <div className="modal__content" onClick={e => e.stopPropagation()}>
-            <button className="modal__close" onClick={closeModal}>×</button>
-            <div className="modal__header">
-              <h2 className="modal__title">{selectedWork.name}</h2>
-            </div>
-            <div className="modal__footer">
-              <button className="modal__link" onClick={closeModal}>CLOSE</button>
-            </div>
+          <p className="contact__eyebrow">Sarah C. Abane · Full Stack Developer Intern</p>
+          <h2 className="contact__cta">Let's Connect</h2>
+          <div className="contact__links">
+            <a href="https://zcrsam.github.io/sarah_portfolio/#" className="contact__btn" target="_blank" rel="noreferrer">View Portfolio</a>
+            <a href="https://github.com/zcrsam" className="contact__btn-ghost" target="_blank" rel="noreferrer">GitHub</a>
+            <a href="https://www.linkedin.com/in/sarahabane/" className="contact__btn-ghost" target="_blank" rel="noreferrer">LinkedIn</a>
+            <a href="mailto:abanearah6@gmail.com" className="contact__btn-ghost">Email</a>
           </div>
         </div>
-      )}
+      </section>
 
       {/* FOOTER */}
       <footer className="footer">
         <span className="footer__logo">abane</span>
         <div className="footer__links">
-          <a href="#">Twitter</a>
-          <a href="#">GitHub</a>
-          <a href="#">LinkedIn</a>
+          <a href="https://github.com/zcrsam" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://www.linkedin.com/in/sarahabane/" target="_blank" rel="noreferrer">LinkedIn</a>
+          <a href="mailto:abanearah6@gmail.com">Email</a>
+          <a href="https://zcrsam.github.io/sarah_portfolio/#" target="_blank" rel="noreferrer">Portfolio</a>
         </div>
-        <span className="footer__copy">© 2026 abane. All rights reserved.</span>
+        <span className="footer__copy">© 2026 Sarah C. Abane. All rights reserved.</span>
       </footer>
     </>
   );
