@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import heroImage from "./assets/template/heroSec.png";
 import heroSec from "./assets/template/heroSec.png";
 import heroSecLeft from "./assets/template/heroSecLeft.png";
 import heroSecRight from "./assets/template/heroSecRight.png";
