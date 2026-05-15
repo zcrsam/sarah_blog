@@ -7,8 +7,27 @@ import heroSecRight from "./assets/template/heroSecRight.png";
 import decorLeft from "./assets/template/2Left.png";
 import decorRight from "./assets/template/2Right.png";
 import { OJT_WEEK_IMAGES } from "./ojtWeekImages";
+import {
+  Microscope,
+  Monitor,
+  Lock,
+  Zap,
+  Bell,
+  Mail,
+  Bug,
+  Home,
+  Sparkles,
+  Mic,
+} from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
+
+// ─── LUCIDE WEEK ICON HELPER ──────────────────────────────────────────────────
+const IconComponents = [Microscope, Monitor, Lock, Zap, Bell, Mail, Bug, Home, Sparkles, Mic];
+const WeekIcon = ({ index, size = 20, color = "currentColor" }) => {
+  const Comp = IconComponents[index];
+  return Comp ? <Comp size={size} color={color} strokeWidth={1.5} /> : null;
+};
 
 // ─── WEEKLY CLOCK ─────────────────────────────────────────────────────────────
 const WeeklyClock = ({ activeWeek, onWeekClick }) => {
@@ -536,21 +555,21 @@ const IGFeed = ({ weeksData, onActiveWeekChange }) => {
     'repeating-linear-gradient(0deg,#f5f2ed,#f5f2ed 2px,#faf9f6 2px,#faf9f6 16px)',
     'radial-gradient(circle at 50% 50%,#ede9e3 0%,#faf9f6 65%)',
   ];
-  const icons = ['🔬','💻','🔐','⚡','🔔','📧','🐛','🏠','✨','🎤'];
+
   const likeCounts = [142,287,198,341,176,523,209,164,247,891];
   const commentCounts = [3,9,14,21,6,32,18,7,15,104];
   const times = ['10 WEEKS AGO','9 WEEKS AGO','8 WEEKS AGO','7 WEEKS AGO','6 WEEKS AGO','5 WEEKS AGO','4 WEEKS AGO','3 WEEKS AGO','2 WEEKS AGO','1 WEEK AGO'];
   const captions = [
-    "Started the OJT journey with deep-dive research into hotel reservation systems. Flowcharts, wireframes, and competitor analysis — week one was all about laying the foundation. 📋",
-    "First lines of production code. Built the entire client landing page, seat map editor, and admin dashboard from scratch. React components flying everywhere 🚀",
-    "Locked in authentication, connected APIs via Postman, set up role-based access control. The backend is alive 🔐 Both Main Wing and Tower Wing seat maps are wired up.",
-    "WebSocket is the coolest thing ever. Live seat availability updates, notification dashboard connected to DB. The system feels ALIVE now ⚡",
-    "Cleaned up the notification system — edit, delete, bulk delete, pagination. Added reschedule/rebook flows. The bundle size thanks me 😌",
-    "Gmail SMTP finally working 🎉 Users now get emails for pending, approved, rejected, and cancelled bookings. Hotel guests will love the Forgot Reference Code feature.",
-    "Bug week 😤 Fixed booking cancellation errors, seat limits, dark/light mode, mobile layouts, email template redesigns. Every bug is a lesson. Every fix is a win. 🔧",
-    "All rooms configured — 20/20 Function Rooms, Laguna Ballroom, Tower Wing, Dining. Fixed seat color states and reservation persistence. The sync bugs are finally GONE 🏠",
-    "Final polish mode activated ✨ Standardized all modals, documented APIs, designed the ReservationPass. Documentation is love.",
-    "Presented the full system to the CIO Sir Mark Jerome Castillo. System endorsed and turned over. 10 weeks. 1 full system. Grateful for everything 🎤❤️",
+    "Started the OJT journey with deep-dive research into hotel reservation systems. Flowcharts, wireframes, and competitor analysis — week one was all about laying the foundation.",
+    "First lines of production code. Built the entire client landing page, seat map editor, and admin dashboard from scratch. React components flying everywhere.",
+    "Locked in authentication, connected APIs via Postman, set up role-based access control. The backend is alive. Both Main Wing and Tower Wing seat maps are wired up.",
+    "WebSocket is the coolest thing ever. Live seat availability updates, notification dashboard connected to DB. The system feels ALIVE now.",
+    "Cleaned up the notification system — edit, delete, bulk delete, pagination. Added reschedule/rebook flows. The bundle size thanks me.",
+    "Gmail SMTP finally working! Users now get emails for pending, approved, rejected, and cancelled bookings. Hotel guests will love the Forgot Reference Code feature.",
+    "Bug week. Fixed booking cancellation errors, seat limits, dark/light mode, mobile layouts, email template redesigns. Every bug is a lesson. Every fix is a win.",
+    "All rooms configured — 20/20 Function Rooms, Laguna Ballroom, Tower Wing, Dining. Fixed seat color states and reservation persistence. The sync bugs are finally GONE.",
+    "Final polish mode activated. Standardized all modals, documented APIs, designed the ReservationPass. Documentation is love.",
+    "Presented the full system to the CIO Sir Mark Jerome Castillo. System endorsed and turned over. 10 weeks. 1 full system. Grateful for everything.",
   ];
   const hashtags = [
     "#OJT #ResearchPhase #ThebellevueManila #SystemDesign",
@@ -566,29 +585,29 @@ const IGFeed = ({ weeksData, onActiveWeekChange }) => {
   ];
 
   const comment1 = [
-    { user: "sarah_abane", text: "Learned how to analyze existing systems and translate research into structured flowcharts. It was harder than I expected to map out every user flow 🗺️" },
-    { user: "sarah_abane", text: "Biggest challenge was keeping components reusable while building so fast. I kept refactoring but it taught me a lot about React structure 💡" },
-    { user: "sarah_abane", text: "Auth was intimidating at first. Understanding JWT flow and role-based access took me a full day — but clicking moment finally came 🔑" },
-    { user: "sarah_abane", text: "WebSockets were new territory for me. The hardest part was handling disconnection states and ensuring the UI always reflects the latest data ⚡" },
-    { user: "sarah_abane", text: "Learned that code splitting is not just about performance — it also forces you to think about component responsibility more carefully 🧠" },
-    { user: "sarah_abane", text: "SMTP setup was trial and error. Learned so much about email deliverability, template design, and error handling for failed sends 📧" },
-    { user: "sarah_abane", text: "This week taught me that debugging is a skill, not a punishment 😅 Every bug told me something about how I was thinking about the system" },
-    { user: "sarah_abane", text: "Configuring 20+ rooms and making sure every seat syncs correctly was exhausting but satisfying. Attention to detail is everything 🏠" },
-    { user: "sarah_abane", text: "Learned that documentation is as important as code. Future me (or whoever continues this) will thank present me 📝" },
-    { user: "sarah_abane", text: "Presenting to the CIO was nerve-wracking but it made me realize how much I actually built in 10 weeks. I'm proud of this 🎤" },
+    { user: "sarah_abane", text: "Learned how to analyze existing systems and translate research into structured flowcharts. It was harder than I expected to map out every user flow." },
+    { user: "sarah_abane", text: "Biggest challenge was keeping components reusable while building so fast. I kept refactoring but it taught me a lot about React structure." },
+    { user: "sarah_abane", text: "Auth was intimidating at first. Understanding JWT flow and role-based access took me a full day — but clicking moment finally came." },
+    { user: "sarah_abane", text: "WebSockets were new territory for me. The hardest part was handling disconnection states and ensuring the UI always reflects the latest data." },
+    { user: "sarah_abane", text: "Learned that code splitting is not just about performance — it also forces you to think about component responsibility more carefully." },
+    { user: "sarah_abane", text: "SMTP setup was trial and error. Learned so much about email deliverability, template design, and error handling for failed sends." },
+    { user: "sarah_abane", text: "This week taught me that debugging is a skill, not a punishment. Every bug told me something about how I was thinking about the system." },
+    { user: "sarah_abane", text: "Configuring 20+ rooms and making sure every seat syncs correctly was exhausting but satisfying. Attention to detail is everything." },
+    { user: "sarah_abane", text: "Learned that documentation is as important as code. Future me (or whoever continues this) will thank present me." },
+    { user: "sarah_abane", text: "Presenting to the CIO was nerve-wracking but it made me realize how much I actually built in 10 weeks. I'm proud of this." },
   ];
 
   const comment2 = [
-    { user: "sarah_abane", text: "Challenge: figuring out what features were truly essential vs. nice-to-have. Scope creep is real even in week one 😅" },
-    { user: "sarah_abane", text: "The seat map editor was the trickiest part — syncing add/delete actions between admin and client in real time without a backend yet 🔄" },
-    { user: "sarah_abane", text: "Challenge was debugging Postman requests and matching them to the actual frontend calls. Mismatched field names cost me hours 😤" },
-    { user: "sarah_abane", text: "Real challenge was making the notification dashboard feel instant without overloading the socket connection. Learned about event debouncing 🎮" },
-    { user: "sarah_abane", text: "The manage booking flow had so many edge cases — what if a booking is already cancelled? Already approved? Each state needed its own logic 🔀" },
-    { user: "sarah_abane", text: "The biggest challenge was testing every email status scenario. I must have sent 50 test emails to myself that week 📬" },
-    { user: "sarah_abane", text: "Mobile responsiveness was harder than desktop. Small screens expose every layout assumption you made without thinking 📱" },
-    { user: "sarah_abane", text: "The color state persistence bug (seats not showing correct status after page refresh) took almost two days to trace. Race condition in the data fetch 🐛" },
-    { user: "sarah_abane", text: "Standardizing modals across 10+ rooms while keeping each one's unique data handling was a real balancing act ✨" },
-    { user: "sarah_abane", text: "Biggest lesson: always build with the next developer in mind. Clean code and clear docs are a form of kindness 💙" },
+    { user: "sarah_abane", text: "Challenge: figuring out what features were truly essential vs. nice-to-have. Scope creep is real even in week one." },
+    { user: "sarah_abane", text: "The seat map editor was the trickiest part — syncing add/delete actions between admin and client in real time without a backend yet." },
+    { user: "sarah_abane", text: "Challenge was debugging Postman requests and matching them to the actual frontend calls. Mismatched field names cost me hours." },
+    { user: "sarah_abane", text: "Real challenge was making the notification dashboard feel instant without overloading the socket connection. Learned about event debouncing." },
+    { user: "sarah_abane", text: "The manage booking flow had so many edge cases — what if a booking is already cancelled? Already approved? Each state needed its own logic." },
+    { user: "sarah_abane", text: "The biggest challenge was testing every email status scenario. I must have sent 50 test emails to myself that week." },
+    { user: "sarah_abane", text: "Mobile responsiveness was harder than desktop. Small screens expose every layout assumption you made without thinking." },
+    { user: "sarah_abane", text: "The color state persistence bug (seats not showing correct status after page refresh) took almost two days to trace. Race condition in the data fetch." },
+    { user: "sarah_abane", text: "Standardizing modals across 10+ rooms while keeping each one's unique data handling was a real balancing act." },
+    { user: "sarah_abane", text: "Biggest lesson: always build with the next developer in mind. Clean code and clear docs are a form of kindness." },
   ];
 
   const [counts, setCounts] = useState(likeCounts.slice());
@@ -615,13 +634,13 @@ const IGFeed = ({ weeksData, onActiveWeekChange }) => {
   };
 
   const weekLabels = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10'];
-  const storyWeeks = weekLabels.map((w, i) => ({ label: w, icon: icons[i], seen: i >= 4, idx: i }));
+  const storyWeeks = weekLabels.map((w, i) => ({ label: w, seen: i >= 4, idx: i }));
   const visiblePosts = activeWeek !== null ? weeksData.filter((_, i) => i === activeWeek) : weeksData;
 
   return (
     <div style={{ background:'#faf9f6', fontFamily:"'Georgia', 'Times New Roman', serif", maxWidth:'600px', margin:'0 auto', width:'100%' }}>
 
-      {/* ── MAIN NAV (sticky, always visible) ── */}
+      {/* ── MAIN NAV (sticky, always visible within feed) ── */}
       <div style={{
         display:'flex', alignItems:'center', justifyContent:'space-between',
         padding:'10px 16px',
@@ -639,12 +658,11 @@ const IGFeed = ({ weeksData, onActiveWeekChange }) => {
         </div>
       </div>
 
-      {/* ── STORIES / WEEK NAV (sticky below main nav, always visible while scrolling) ── */}
+      {/* ── STORIES / WEEK NAV ── */}
       <div style={{
         display:'flex', gap:'10px', padding:'10px 14px',
         overflowX:'auto', borderBottom:'1px solid rgba(0,0,0,0.08)',
         scrollbarWidth:'none', msOverflowStyle:'none',
-        /* Sticky: sits just below the 41px ojtblog nav */
         position:'sticky', top:'41px',
         background:'rgba(250,249,246,0.97)',
         backdropFilter:'blur(8px)',
@@ -665,7 +683,6 @@ const IGFeed = ({ weeksData, onActiveWeekChange }) => {
                   ? 'rgba(0,0,0,0.1)'
                   : 'conic-gradient(#1a1a1a 0deg, #555 120deg, #999 240deg, #1a1a1a 360deg)',
               transition:'all 0.2s',
-              /* Triple ring for selected: dark outer ring, white gap, dark fill */
               boxShadow: activeWeek === s.idx
                 ? '0 0 0 2.5px #1a1a1a, 0 0 0 4.5px #faf9f6, 0 0 0 7px #1a1a1a'
                 : 'none',
@@ -673,8 +690,10 @@ const IGFeed = ({ weeksData, onActiveWeekChange }) => {
               <div style={{
                 width:'100%', height:'100%', borderRadius:'50%',
                 background:'#faf9f6', border:'2px solid #faf9f6',
-                display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px',
-              }}>{s.icon}</div>
+                display:'flex', alignItems:'center', justifyContent:'center',
+              }}>
+                <WeekIcon index={s.idx} size={18} color="rgba(10,10,10,0.65)" />
+              </div>
             </div>
             <span style={{
               fontSize:'10px',
@@ -685,7 +704,6 @@ const IGFeed = ({ weeksData, onActiveWeekChange }) => {
               overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
               textDecoration: activeWeek === s.idx ? 'underline' : 'none',
               textUnderlineOffset:'2px',
-              /* Pill highlight behind selected label */
               background: activeWeek === s.idx ? 'rgba(0,0,0,0.07)' : 'transparent',
               borderRadius:'3px', padding: activeWeek === s.idx ? '1px 4px' : '0',
               transition:'all 0.2s',
@@ -700,7 +718,6 @@ const IGFeed = ({ weeksData, onActiveWeekChange }) => {
           background:'rgba(0,0,0,0.03)',
           borderBottom:'1px solid rgba(0,0,0,0.08)',
           display:'flex', alignItems:'center', justifyContent:'space-between',
-          /* Also sticky so it stays visible */
           position:'sticky', top:'122px',
           zIndex:98,
           backdropFilter:'blur(8px)',
@@ -721,9 +738,16 @@ const IGFeed = ({ weeksData, onActiveWeekChange }) => {
         const i = weeksData.indexOf(week);
         return (
           <div key={week.id} style={{ background:'#faf9f6', borderBottom:'1px solid rgba(0,0,0,0.08)' }}>
+            {/* Post header */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 12px' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                <div style={{ width:'30px', height:'30px', borderRadius:'50%', background:'rgba(0,0,0,0.06)', border:'1px solid rgba(0,0,0,0.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'14px', flexShrink:0 }}>{icons[i]}</div>
+                <div style={{
+                  width:'30px', height:'30px', borderRadius:'50%',
+                  background:'rgba(0,0,0,0.06)', border:'1px solid rgba(0,0,0,0.12)',
+                  display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
+                }}>
+                  <WeekIcon index={i} size={14} color="rgba(10,10,10,0.65)" />
+                </div>
                 <div>
                   <div style={{ fontSize:'12px', fontWeight:700, color:'#1a1a1a', fontFamily:"'Georgia', serif" }}>sarah_abane</div>
                   <div style={{ fontSize:'10px', color:'rgba(0,0,0,0.4)', fontFamily:"'Georgia', serif" }}>OJT @ The Bellevue Manila</div>
@@ -732,6 +756,7 @@ const IGFeed = ({ weeksData, onActiveWeekChange }) => {
               <span style={{ fontSize:'18px', color:'rgba(0,0,0,0.35)', cursor:'pointer', letterSpacing:'0.1em' }}>···</span>
             </div>
 
+            {/* Week banner */}
             <div style={{ width:'100%', height:'80px', background: bgPatterns[i], display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', position:'relative', overflow:'hidden', borderTop:'1px solid rgba(0,0,0,0.06)' }}>
               <div style={{ position:'absolute', inset:'8px', border:'1px solid rgba(0,0,0,0.08)', pointerEvents:'none' }} />
               <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'2px', padding:'8px 32px', zIndex:1, textAlign:'center' }}>
@@ -739,12 +764,15 @@ const IGFeed = ({ weeksData, onActiveWeekChange }) => {
                 <span style={{ fontSize:'clamp(12px,2.5vw,16px)', fontWeight:900, letterSpacing:'-0.02em', textAlign:'center', lineHeight:1.1, color:'#1a1a1a', fontFamily:"'Georgia', serif" }}>{week.name}</span>
                 <span style={{ fontSize:'9px', color:'rgba(0,0,0,0.4)', fontFamily:"'Georgia', serif", fontStyle:'italic' }}>{week.dates}</span>
               </div>
-              <span style={{ position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)', fontSize:'clamp(24px,5vw,40px)', fontWeight:900, lineHeight:1, color:'rgba(0,0,0,0.05)', letterSpacing:'-3px', userSelect:'none', pointerEvents:'none', fontFamily:"'Georgia', serif" }}>{week.id}</span>
+              <div style={{ position:'absolute', right:'18px', top:'50%', transform:'translateY(-50%)', opacity:0.07, pointerEvents:'none' }}>
+                <WeekIcon index={i} size={38} color="#1a1a1a" />
+              </div>
               <span style={{ position:'absolute', top:'8px', left:'12px', fontSize:'8px', fontWeight:700, letterSpacing:'0.15em', textTransform:'uppercase', color:'rgba(0,0,0,0.25)', fontFamily:"'Georgia', serif" }}>{week.category}</span>
             </div>
 
             <InlineImageCarousel images={week.images} />
 
+            {/* Action row */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 12px' }}>
               <div style={{ display:'flex', gap:'12px', alignItems:'center' }}>
                 <button onClick={() => toggleLike(i)} style={{ background:'none', border:'none', cursor:'pointer', padding:'2px', display:'flex', alignItems:'center' }}>
@@ -921,6 +949,9 @@ const DevianPortfolio = () => {
 
   const [sharedActiveWeek, setSharedActiveWeek] = useState(null);
 
+  // ── NAV visibility state — visible by default ──
+  const [showNav, setShowNav] = useState(true);
+
   const weeksData = [
     { id:'01', name:'WEEK ONE',   dates:'February 24–27, 2026', category:'RESEARCH & SYSTEM ANALYSIS',
       description:'Focused on research and development related to seat and table management systems used in hotels, restaurants, and event venues. Analyzed existing reservation platforms and studied their workflows, functionalities, and user interfaces.',
@@ -975,6 +1006,30 @@ const DevianPortfolio = () => {
   ];
 
   useEffect(() => {
+    // NAV SCROLL LOGIC
+    // • Visible on load (at top of page)
+    // • Fades out the moment scrolling starts — inside or outside the hero
+    // • Inside hero: stays hidden even when scroll stops
+    // • Past hero: reappears 180ms after scroll settles
+    let scrollTimeout;
+
+    const handleNavScroll = () => {
+      const hero = document.querySelector("#hero");
+      if (!hero) return;
+      const pastHero = hero.getBoundingClientRect().bottom <= 0;
+      setShowNav(false);
+      clearTimeout(scrollTimeout);
+      if (pastHero) {
+        scrollTimeout = setTimeout(() => setShowNav(true), 180);
+      }
+    };
+
+    window.addEventListener("scroll", handleNavScroll, { passive: true });
+    // No initial call — nav starts visible via useState(true)
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // GSAP (delayed so DOM is ready)
+    // ─────────────────────────────────────────────────────────────────────────
     const timer = setTimeout(() => {
       ScrollTrigger.refresh();
 
@@ -1055,7 +1110,12 @@ const DevianPortfolio = () => {
       }
     }, 200);
 
-    return () => { clearTimeout(timer); ScrollTrigger.getAll().forEach(t => t.kill()); };
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(scrollTimeout);
+      ScrollTrigger.getAll().forEach(t => t.kill());
+      window.removeEventListener('scroll', handleNavScroll);
+    };
   }, []);
 
   return (
@@ -1070,16 +1130,32 @@ const DevianPortfolio = () => {
         img{display:block;width:100%;height:100%;object-fit:cover}
 
         /* ── GLOBAL NAV ── */
-        .nav{position:fixed;top:0;left:0;width:100%;z-index:200;pointer-events:none}
+        .nav{
+          position:fixed;top:0;left:0;width:100%;z-index:200;
+          pointer-events:none;
+          background:transparent !important;
+          backdrop-filter:none !important;
+          -webkit-backdrop-filter:none !important;
+          transition:opacity 0.35s ease, transform 0.35s ease;
+        }
+        .nav.nav--visible {
+          opacity: 1;
+          transform: translateY(0);
+          pointer-events: auto;
+        }
+        .nav.nav--hidden {
+          opacity: 0;
+          transform: translateY(-8px);
+          pointer-events: none;
+        }
         .nav__inner{
           max-width:1280px;margin:0 auto;
           padding:20px 40px;
           display:flex;align-items:center;justify-content:space-between;
           gap:12px;
-          /* Frosted glass so it always readable */
-          background:rgba(250,249,246,0.88);
-          backdropFilter:blur(10px);
-          -webkit-backdrop-filter:blur(10px);
+          background:transparent !important;
+          backdrop-filter:none !important;
+          -webkit-backdrop-filter:none !important;
         }
         .nav a,.nav button,.nav span{pointer-events:auto;color:var(--black);text-decoration:none;font-size:12px;font-weight:600;letter-spacing:0.08em;font-family:'Georgia',serif}
         .nav__logo{font-size:18px;font-weight:800;color:var(--black);font-style:italic;flex-shrink:0}
@@ -1102,12 +1178,25 @@ const DevianPortfolio = () => {
         .hero__img{position:absolute;overflow:hidden;z-index:1}
         .hero__after{position:absolute;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;pointer-events:none;z-index:10}
 
-        /* ── HERO IMAGES: desktop three-column layout ── */
-        .hero__img--left{top:5%;left:2%;width:22%;height:85%;z-index:0}
-        .hero__img--center{top:-30px;left:50%;transform:translateX(-50%);width:38%;height:100%;z-index:10}
-        .hero__img--right{top:5%;right:2%;width:22%;height:85%;z-index:0}
+        .hero__img--left{
+          top:50%;left:3%;
+          transform:translateY(-50%);
+          width:18%;height:60%;
+          z-index:0;
+        }
+        .hero__img--center{
+          top:0;left:50%;
+          transform:translateX(-50%);
+          width:36%;height:100%;
+          z-index:10;
+        }
+        .hero__img--right{
+          top:50%;right:3%;
+          transform:translateY(-50%);
+          width:18%;height:60%;
+          z-index:0;
+        }
 
-        /* ── HERO IMAGES: mobile — center only, full width, full height ── */
         @media(max-width:640px){
           .hero__img--left  { display:none !important; }
           .hero__img--right { display:none !important; }
@@ -1213,7 +1302,6 @@ const DevianPortfolio = () => {
           -ms-overflow-style:none;
         }
 
-        /* ── Stack to single column on mobile ── */
         @media(max-width:768px){
           .expertise-section{
             flex-direction:column;
@@ -1222,7 +1310,6 @@ const DevianPortfolio = () => {
           .expertise-left{
             flex:none;
             width:100%;
-            /* Give the feed a viewport-height on mobile so it's independently scrollable */
             height:100vh;
             border-right:none;
             border-bottom:1px solid rgba(0,0,0,0.08);
@@ -1235,12 +1322,11 @@ const DevianPortfolio = () => {
           }
         }
 
-        /* ── Hide scrollbars on webkit (story strip) ── */
         .story-strip::-webkit-scrollbar { display: none; }
       `}</style>
 
       {/* ── GLOBAL NAV ── */}
-      <nav className="nav">
+      <nav className={`nav ${showNav ? 'nav--visible' : 'nav--hidden'}`}>
         <div className="nav__inner">
           <span className="nav__logo">abane</span>
           <div className="nav__links">
@@ -1259,15 +1345,12 @@ const DevianPortfolio = () => {
       <section className="hero" id="hero">
         <div className="hero__sticky">
           <div className="hero__scene" ref={heroSceneRef}>
-            {/* LEFT — hidden on mobile via CSS */}
             <div className="hero__img hero__img--left">
               <img src={heroSecLeft} alt="Hero Left" style={{ objectFit:'contain', objectPosition:'center' }} />
             </div>
-            {/* CENTER — full width on mobile */}
             <div className="hero__img hero__img--center">
               <img src={heroImage} alt="Hero" style={{ objectFit:'contain', objectPosition:'center' }} />
             </div>
-            {/* RIGHT — hidden on mobile via CSS */}
             <div className="hero__img hero__img--right">
               <img src={heroSecRight} alt="Hero Right" style={{ objectFit:'contain', objectPosition:'center' }} />
             </div>
@@ -1330,17 +1413,15 @@ const DevianPortfolio = () => {
         </div>
       </section>
 
-      {/* ── JOURNAL — responsive two-col → one-col ── */}
+      {/* ── JOURNAL ── */}
       <section
         id="expertise"
         ref={expertiseSectionRef}
         className="expertise-section"
       >
-        {/* LEFT: OJT Blog Feed */}
         <div className="expertise-left">
           <IGFeed weeksData={weeksData} onActiveWeekChange={setSharedActiveWeek} />
         </div>
-        {/* RIGHT: Daily Reports */}
         <div className="expertise-right">
           <DailyReportSection inline activeWeekFromFeed={sharedActiveWeek} />
         </div>
