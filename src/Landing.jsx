@@ -1438,7 +1438,7 @@ const SarahPortfolio = () => {
       {/* ── CONTACT ── */}
       <section className="contact" id="contact" ref={contactSectionRef}>
         <div className="contact__inner" ref={contactInnerRef}>
-          <p className="contact__eyebrow">Sarah C. Abane · Full Stack Developer Intern</p>
+          <p className="contact__eyebrow">Sarah C. Abane · The Bellevue Manila</p>
           <h2 className="contact__cta">BSIT 4C 2026</h2>
           <div className="contact__links">
             <a href="https://zcrsam.github.io/sarah_portfolio/#" className="contact__btn" target="_blank" rel="noreferrer">View Portfolio</a>
