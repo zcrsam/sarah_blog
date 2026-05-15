@@ -23,7 +23,3 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
-
-# OJT week assets: HEIC not used in the web feed
-src/assets/weeks/**/*.HEIC
-src/assets/weeks/**/*.heic
