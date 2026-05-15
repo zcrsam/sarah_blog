@@ -1440,12 +1440,7 @@ const SarahPortfolio = () => {
         <div className="contact__inner" ref={contactInnerRef}>
           <p className="contact__eyebrow">Sarah C. Abane · The Bellevue Manila</p>
           <h2 className="contact__cta">BSIT 4C 2026</h2>
-          <div className="contact__links">
-            <a href="https://zcrsam.github.io/sarah_portfolio/#" className="contact__btn" target="_blank" rel="noreferrer">View Portfolio</a>
-            <a href="https://github.com/zcrsam" className="contact__btn-ghost" target="_blank" rel="noreferrer">GitHub</a>
-            <a href="https://www.linkedin.com/in/sarahabane/" className="contact__btn-ghost" target="_blank" rel="noreferrer">LinkedIn</a>
-            <a href="mailto:abanearah6@gmail.com" className="contact__btn-ghost">Email</a>
-          </div>
+     
         </div>
       </section>
 
