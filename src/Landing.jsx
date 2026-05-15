@@ -935,7 +935,7 @@ const CursorTrail = () => {
 };
 
 // ─── MAIN PORTFOLIO ───────────────────────────────────────────────────────────
-const DevianPortfolio = () => {
+const SarahPortfolio = () => {
   const heroSceneRef = useRef(null);
   const heroAfterRef = useRef(null);
   const marqueeTrackRef = useRef(null);
@@ -1332,12 +1332,8 @@ const DevianPortfolio = () => {
           <div className="nav__links">
             <a href="#creative">Work</a>
             <a href="#expertise">Journal</a>
-            <a href="#contact">Contact</a>
           </div>
-          <button
-            className="nav__cta"
-            onClick={() => window.open('https://zcrsam.github.io/sarah_portfolio/#', '_blank')}
-          >Portfolio</button>
+          
         </div>
       </nav>
 
@@ -1443,7 +1439,7 @@ const DevianPortfolio = () => {
       <section className="contact" id="contact" ref={contactSectionRef}>
         <div className="contact__inner" ref={contactInnerRef}>
           <p className="contact__eyebrow">Sarah C. Abane · Full Stack Developer Intern</p>
-          <h2 className="contact__cta">Let's Connect</h2>
+          <h2 className="contact__cta">BSIT 4C 2026</h2>
           <div className="contact__links">
             <a href="https://zcrsam.github.io/sarah_portfolio/#" className="contact__btn" target="_blank" rel="noreferrer">View Portfolio</a>
             <a href="https://github.com/zcrsam" className="contact__btn-ghost" target="_blank" rel="noreferrer">GitHub</a>
@@ -1468,4 +1464,4 @@ const DevianPortfolio = () => {
   );
 };
 
-export default DevianPortfolio;
+export default SarahPortfolio;
