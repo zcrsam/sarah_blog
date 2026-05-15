@@ -6,7 +6,8 @@ import heroSecLeft from "./assets/template/heroSecLeft.png";
 import heroSecRight from "./assets/template/heroSecRight.png";
 import decorLeft from "./assets/template/2Left.png";
 import decorRight from "./assets/template/2Right.png";
-import { OJT_WEEK_IMAGES } from "./ojtWeekImages";
+import { OJT_WEEK_MEDIA } from "./ojtWeekImages";
+import WeekMediaCarousel from "./WeekMediaCarousel";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -227,110 +228,6 @@ const WeeklyClock = ({ activeWeek, onWeekClick }) => {
   );
 };
 
-// ─── INLINE IMAGE CAROUSEL ────────────────────────────────────────────────────
-const InlineImageCarousel = ({ images }) => {
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-
-  const allImages = images || [];
-  const total = allImages.length;
-
-  if (total === 0) return null;
-
-  const prev = (e) => { e.stopPropagation(); setCurrentIdx(i => (i - 1 + total) % total); };
-  const next = (e) => { e.stopPropagation(); setCurrentIdx(i => (i + 1) % total); };
-
-  return (
-    <>
-      {/* LIGHTBOX */}
-      {lightboxOpen && (
-        <div
-          onClick={() => setLightboxOpen(false)}
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)',
-            zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'zoom-out',
-          }}
-        >
-          <button
-            onClick={() => setLightboxOpen(false)}
-            style={{
-              position: 'absolute', top: '20px', right: '24px',
-              background: 'none', border: 'none', color: '#fff',
-              fontSize: '28px', cursor: 'pointer', lineHeight: 1, zIndex: 1,
-            }}
-          >✕</button>
-          {total > 1 && (
-            <button onClick={(e) => { e.stopPropagation(); setCurrentIdx(i => (i - 1 + total) % total); }} style={{ position:'absolute', left:'20px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.2)', color:'#fff', fontSize:'28px', width:'48px', height:'48px', borderRadius:'50%', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>‹</button>
-          )}
-          <img
-            src={allImages[currentIdx]}
-            alt={`Week image ${currentIdx + 1}`}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: '90vw', maxHeight: '90vh',
-              objectFit: 'contain', borderRadius: '4px',
-              boxShadow: '0 8px 60px rgba(0,0,0,0.6)',
-              cursor: 'default',
-            }}
-          />
-          {total > 1 && (
-            <button onClick={(e) => { e.stopPropagation(); setCurrentIdx(i => (i + 1) % total); }} style={{ position:'absolute', right:'20px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.2)', color:'#fff', fontSize:'28px', width:'48px', height:'48px', borderRadius:'50%', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>›</button>
-          )}
-          <div style={{ position:'absolute', bottom:'20px', left:'50%', transform:'translateX(-50%)', color:'rgba(255,255,255,0.5)', fontSize:'11px', fontFamily:"'Georgia',serif", letterSpacing:'0.1em' }}>{currentIdx + 1} / {total}</div>
-        </div>
-      )}
-
-      <div style={{ width: '100%' }}>
-        <div
-          style={{
-            width: '100%', height: '200px', overflow: 'hidden', position: 'relative',
-            background: 'rgba(0,0,0,0.04)',
-            borderTop: '1px solid rgba(0,0,0,0.06)',
-            borderBottom: '1px solid rgba(0,0,0,0.06)',
-            cursor: 'zoom-in',
-          }}
-          onClick={() => setLightboxOpen(true)}
-        >
-          <img
-            src={allImages[currentIdx]}
-            alt={`Week image ${currentIdx + 1}`}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            onError={(e) => {
-              if (images && images[currentIdx % images.length]) {
-                e.target.src = images[currentIdx % images.length];
-              }
-            }}
-          />
-          {total > 1 && (
-            <>
-              <button onClick={prev} style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.9)', border:'none', borderRadius:'50%', width:'28px', height:'28px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'16px', boxShadow:'0 1px 6px rgba(0,0,0,0.2)', fontFamily:'Georgia,serif', color:'#1a1a1a', lineHeight:1 }}>‹</button>
-              <button onClick={next} style={{ position:'absolute', right:'12px', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.9)', border:'none', borderRadius:'50%', width:'28px', height:'28px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'16px', boxShadow:'0 1px 6px rgba(0,0,0,0.2)', fontFamily:'Georgia,serif', color:'#1a1a1a', lineHeight:1 }}>›</button>
-            </>
-          )}
-          {total > 1 && (
-            <div style={{ position:'absolute', bottom:'10px', left:'50%', transform:'translateX(-50%)', display:'flex', gap:'5px', alignItems:'center' }}>
-              {allImages.map((_, i) => (
-                <div key={i} onClick={(e) => { e.stopPropagation(); setCurrentIdx(i); }} style={{ width: i === currentIdx ? '16px' : '6px', height:'6px', borderRadius:'3px', background: i === currentIdx ? '#fff' : 'rgba(255,255,255,0.55)', transition:'all 0.25s', cursor:'pointer', boxShadow:'0 1px 3px rgba(0,0,0,0.3)' }} />
-              ))}
-            </div>
-          )}
-          <div style={{ position:'absolute', top:'10px', right:'12px', background:'rgba(0,0,0,0.45)', color:'#fff', fontSize:'10px', fontFamily:"'Georgia', serif", padding:'3px 8px', borderRadius:'10px', letterSpacing:'0.08em' }}>{currentIdx + 1} / {total}</div>
-          <div style={{ position:'absolute', bottom:'10px', left:'12px', background:'rgba(0,0,0,0.35)', color:'rgba(255,255,255,0.7)', fontSize:'9px', fontFamily:"'Georgia', serif", padding:'2px 7px', borderRadius:'10px', letterSpacing:'0.1em' }}>tap to expand</div>
-        </div>
-        {total > 1 && (
-          <div style={{ display:'flex', gap:'2px', background:'rgba(0,0,0,0.03)', borderBottom:'1px solid rgba(0,0,0,0.06)' }}>
-            {allImages.map((src, i) => (
-              <div key={i} onClick={(e) => { e.stopPropagation(); setCurrentIdx(i); }} style={{ flex:1, height:'36px', overflow:'hidden', cursor:'pointer', opacity: i === currentIdx ? 1 : 0.45, outline: i === currentIdx ? '2px solid #1a1a1a' : '2px solid transparent', outlineOffset:'-2px', transition:'all 0.2s' }}>
-                <img src={src} alt={`thumb ${i+1}`} style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={(e) => { if (images && images[i % images.length]) { e.target.src = images[i % images.length]; } }} />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </>
-  );
-};
 
 // ─── CLOCK PANEL ─────────────────────────────────────────────────────────────
 const ClockPanel = () => {
@@ -641,7 +538,7 @@ const comment2 = [
       </div>
 
       {/* STORIES / WEEK NAV — highlighted */}
-      <div style={{ display:'flex', gap:'10px', padding:'10px 14px', overflowX:'auto', borderBottom:'1px solid rgba(0,0,0,0.08)', scrollbarWidth:'none' }}>
+      <div style={{ display:'flex', gap:'10px', padding:'10px 14px', overflowX:'auto', borderBottom:'1px solid rgba(0,0,0,0.08)', scrollbarWidth:'none', position:'sticky', top:'48px', background:'rgba(250,249,246,0.97)', backdropFilter:'blur(8px)', zIndex:99 }}>
         {storyWeeks.map((s, i) => (
           <div key={i} onClick={() => { handleSetActiveWeek(activeWeek === s.idx ? null : s.idx); }} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'4px', flexShrink:0, cursor:'pointer' }}>
             {/* Ring: highlighted when active */}
@@ -672,8 +569,8 @@ const comment2 = [
 
       {/* ACTIVE WEEK LABEL */}
       {activeWeek !== null && (
-        <div style={{ padding:'8px 14px', background:'rgba(0,0,0,0.03)', borderBottom:'1px solid rgba(0,0,0,0.08)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <span style={{ fontSize:'11px', fontFamily:"'Georgia', serif", color:'rgba(0,0,0,0.5)', letterSpacing:'0.1em', textTransform:'uppercase' }}>Showing: <strong style={{color:'#1a1a1a'}}>{weekLabels[activeWeek]}</strong></span>
+        <div style={{ padding:'8px 14px', background:'rgba(250,249,246,0.97)', borderBottom:'1px solid rgba(0,0,0,0.08)', display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:'calc(48px + 74px)', zIndex:98 }}>
+        <span style={{ fontSize:'11px', fontFamily:"'Georgia', serif", color:'rgba(0,0,0,0.5)', letterSpacing:'0.1em', textTransform:'uppercase' }}>Showing: <strong style={{color:'#1a1a1a'}}>{weekLabels[activeWeek]}</strong></span>
           <button onClick={() => handleSetActiveWeek(null)} style={{ background:'transparent', border:'none', fontSize:'11px', color:'rgba(0,0,0,0.4)', cursor:'pointer', fontFamily:"'Georgia', serif", textDecoration:'underline' }}>Show all</button>
         </div>
       )}
@@ -715,7 +612,7 @@ const comment2 = [
             </div>
 
             {/* INLINE IMAGE CAROUSEL */}
-            <InlineImageCarousel images={week.images} />
+            <WeekMediaCarousel media={week.media} />
 
             {/* Actions */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 12px' }}>
@@ -899,7 +796,7 @@ const CursorTrail = () => {
 };
 
 // ─── MAIN PORTFOLIO ───────────────────────────────────────────────────────────
-const DevianPortfolio = () => {
+const SarahPortfolio = () => {
   const heroSceneRef = useRef(null);
   const heroAfterRef = useRef(null);
   const marqueeTrackRef = useRef(null);
@@ -921,52 +818,52 @@ const DevianPortfolio = () => {
       description:'Focused on research and development related to seat and table management systems used in hotels, restaurants, and event venues. Analyzed existing reservation platforms and studied their workflows, functionalities, and user interfaces.',
       topics:'System Research, Competitor Analysis, Flowchart Design, UI/UX Wireframing', duration:'4 days',
       outcomes:'Created comparison tables, designed initial system flowcharts for client and admin sides, and produced initial UI/UX layout concepts for the landing page, reservation pages, and dashboard interfaces.',
-      images: OJT_WEEK_IMAGES[0] },
+      media: OJT_WEEK_MEDIA[0] },
     { id:'02', name:'WEEK TWO',   dates:'March 2–6, 2026',      category:'FRONTEND DEVELOPMENT',
       description:'Officially started the development phase with a focus on front-end development for both client and admin sides of the Seat and Table Reservation Management System.',
       topics:'Client Landing Page, All Venues Page, Seat Map Layout, Admin Dashboard, Login Page', duration:'5 days',
       outcomes:'Developed the client-side landing page, "All Venues" page, seat/table layouts, admin login page, admin dashboard, and seat map editor. Implemented table/seat add-delete functions and improved UI consistency.',
-      images: OJT_WEEK_IMAGES[1] },
+      media: OJT_WEEK_MEDIA[1] },
     { id:'03', name:'WEEK THREE', dates:'March 9–13, 2026',     category:'AUTHENTICATION & BACKEND',
       description:'Focused on authentication, backend integration, and real-time reservation synchronization between the client and admin systems.',
       topics:'Authentication, Postman API Testing, Database Integration, Role-Based Access, Notifications', duration:'5 days',
       outcomes:'Implemented login authentication, connected backend with Postman for API testing, displayed reservation data in admin panels, configured Main Wing and Tower Wing seat maps, and added navigation notification icon.',
-      images: OJT_WEEK_IMAGES[2] },
+      media: OJT_WEEK_MEDIA[2] },
     { id:'04', name:'WEEK FOUR',  dates:'March 16–20, 2026',    category:'REAL-TIME FEATURES & UI',
       description:'Focused on fixing system issues, improving user experience, and implementing real-time functionalities including WebSocket integration.',
       topics:'WebSocket Integration, Notification Dashboard, Real-time Sync, Pagination, Responsiveness', duration:'5 days',
       outcomes:'Fixed connection errors, corrected seat status color legends, built and connected Notification Dashboard to database, implemented WebSocket for live updates, improved dashboard responsiveness and time formatting.',
-      images: OJT_WEEK_IMAGES[3] },
+      media: OJT_WEEK_MEDIA[3] },
     { id:'05', name:'WEEK FIVE',  dates:'March 25–31, 2026',    category:'NOTIFICATION & OPTIMIZATION',
       description:'Enhanced notification management and implemented booking management functionalities with code optimization.',
       topics:'Manage Booking, Edit/Delete Notifications, Pagination, Mobile Responsiveness, Code Splitting', duration:'5 days',
       outcomes:'Added edit/delete for notifications with pagination, implemented auto-deletion for removed seats/tables, developed Manage Booking (cancel/edit/reschedule/rebook), added sorting by most recent, and optimized code structure.',
-      images: OJT_WEEK_IMAGES[4] },
+      media: OJT_WEEK_MEDIA[4] },
     { id:'06', name:'WEEK SIX',   dates:'April 1–9, 2026',      category:'EMAIL & BOOKING INTEGRATION',
       description:'Improved the Manage Booking module with database integration and implemented a complete email notification system using Gmail SMTP.',
       topics:'Gmail SMTP, Email Templates, Booking Search, Forgot Reference Code, Dynamic Venue Creation', duration:'7 days',
       outcomes:'Integrated Manage Booking with database, added search/validation/cancellation features, implemented email notifications for pending/approved/rejected/cancelled statuses, added Forgot Reference Code feature, and improved UI across multiple pages.',
-      images: OJT_WEEK_IMAGES[5] },
+      media: OJT_WEEK_MEDIA[5] },
     { id:'07', name:'WEEK SEVEN', dates:'April 13–18, 2026',    category:'DEBUGGING & UX ENHANCEMENTS',
       description:'Focused on debugging reservation logic, improving validations, and enhancing user experience across multiple system components.',
       topics:'Booking Cancellation Fix, Seat Validation, Mobile UX, Email Template Redesign, Dark/Light Mode', duration:'5 days',
       outcomes:'Fixed booking cancellation errors, seat limits, and invalid statuses. Improved Notifications mobile layout, added Select All bulk delete, redesigned email templates, fixed homepage animations and carousel, and implemented email subscription flow.',
-      images: OJT_WEEK_IMAGES[6] },
+      media: OJT_WEEK_MEDIA[6] },
     { id:'08', name:'WEEK EIGHT', dates:'April 20–24, 2026',    category:'ROOM CONFIG & SYNC FIXES',
       description:'Completed room configurations for Main Wing, Tower Wing, and Dining areas, and resolved critical reservation synchronization issues.',
       topics:'Room Configuration, Subroom Setup, Seat Color States, Approval Workflow, Reservation Persistence', duration:'5 days',
       outcomes:'Added 20/20 Function Rooms and Laguna Ballroom configurations. Fixed seat color states, modal handling, reservation persistence bugs, and ensured approved reservations reflected correct reserved status in real time.',
-      images: OJT_WEEK_IMAGES[7] },
+      media: OJT_WEEK_MEDIA[7] },
     { id:'09', name:'WEEK NINE',  dates:'April 27–30, 2026',    category:'UI REFINEMENTS & DOCUMENTATION',
       description:'Final UI refinements, synchronization fixes across Tower Wing, and thorough system documentation for future maintainers.',
       topics:'Modal Standardization, Sync Fixes, API Documentation, ReservationPass Design, Notification Cleanup', duration:'4 days',
       outcomes:'Fixed invisible modal pop-ups and inconsistent designs in Main Wing rooms. Standardized modal interfaces, fixed Tower Wing seat sync, documented APIs and database seeders, and developed ReservationPass design using Inter font.',
-      images: OJT_WEEK_IMAGES[8] },
+      media: OJT_WEEK_MEDIA[8] },
     { id:'10', name:'WEEK TEN',   dates:'May 1–4, 2026',        category:'PRESENTATION & PROJECT TURNOVER',
       description:'Final week dedicated to preparing the system for presentation to the Chief Information Officer and executing a complete project turnover.',
       topics:'System Review, CIO Presentation, Documentation, Project Endorsement, Recommendations', duration:'4 days',
       outcomes:'Reviewed all modules end-to-end, presented to Sir Mark Jerome Castillo (CIO), finalized presentation materials and documentation, documented revisions and pending improvements, and endorsed the system to the next OJT trainee.',
-      images: OJT_WEEK_IMAGES[9] },
+      media: OJT_WEEK_MEDIA[9] },
   ];
 
   const closeModal = () => { setIsModalOpen(false); setSelectedWork(null); document.body.style.overflow = 'unset'; };
@@ -1304,4 +1201,4 @@ const DevianPortfolio = () => {
   );
 };
 
-export default DevianPortfolio;
+export default SarahPortfolio;
