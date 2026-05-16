@@ -1429,6 +1429,7 @@ const SarahPortfolio = () => {
           <span>RESEARCH</span><span>·</span>
           <span>FRONTEND</span><span>·</span>
           <span>BACKEND</span><span>·</span>
+          <span>UI/UX</span><span>·</span>
           <span>REALTIME</span><span>·</span>
           <span>FULLSTACK</span><span>·</span>
           <span>INTERNSHIP</span><span>·</span>
